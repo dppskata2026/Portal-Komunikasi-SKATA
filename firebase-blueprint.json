@@ -1,0 +1,66 @@
+{
+  "entities": {
+    "news_articles": {
+      "title": "News Articles",
+      "description": "Collection of SKATA news and announcements",
+      "properties": {
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "excerpt": { "type": "string" },
+        "body": { "type": "string" },
+        "date": { "type": "string" },
+        "image": { "type": "string" },
+        "createdAt": { "type": "string" }
+      }
+    },
+    "aspirations": {
+      "title": "Aspirations",
+      "description": "User feedback and aspirations sent to SKATA management",
+      "properties": {
+        "nama": { "type": "string" },
+        "dpw": { "type": "string" },
+        "text": { "type": "string" },
+        "date": { "type": "string" },
+        "likes": { "type": "number" },
+        "createdAt": { "type": "string" }
+      }
+    },
+    "memberships": {
+      "title": "Memberships",
+      "description": "Registered SKATA union members",
+      "properties": {
+        "nama": { "type": "string" },
+        "nik": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "dpw": { "type": "string" },
+        "unit": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string" }
+      }
+    }
+  },
+  "securityRules": [
+    {
+      "collection": "news_articles",
+      "allow": {
+        "read": true,
+        "write": true
+      }
+    },
+    {
+      "collection": "aspirations",
+      "allow": {
+        "read": true,
+        "write": true
+      }
+    },
+    {
+      "collection": "memberships",
+      "allow": {
+        "read": true,
+        "write": true
+      }
+    }
+  ]
+}

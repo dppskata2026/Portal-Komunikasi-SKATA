@@ -1,0 +1,12 @@
+Run the imported React TypeScript application exactly as provided.
+
+IMPORTANT:
+- Do not redesign the homepage.
+- Do not generate a new logo.
+- Do not replace local assets.
+- Preserve /public/assets/skata-logo-official.png.
+- Preserve /public/assets/skata-hero-visual.png.
+- Keep the current layout, spacing, typography, dashboard, quick-access panel, and responsive behavior.
+- Install the existing npm dependencies.
+- Fix only compilation or runtime errors if any.
+- Show the live preview after the application runs.
