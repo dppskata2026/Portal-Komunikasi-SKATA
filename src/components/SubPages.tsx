@@ -1769,11 +1769,11 @@ export function KontakPage({ onBack }: { onBack: () => void }) {
             <div>
               <strong>Hubungi Pengurus Wilayah (DPW):</strong>
               <ul className="premium-list" style={{ marginTop: '8px', fontSize: '13px' }}>
-                <li><strong>DPW I Sumatera:</strong> Ade Hermansyah (dpw1@skata-gsd.or.id)</li>
-                <li><strong>DPW II DKI & Banten:</strong> Asep Saipul Bahry (dpw2@skata-gsd.or.id)</li>
-                <li><strong>DPW III Jawa Timur & Bali:</strong> Angga Eka Saputra (dpw3@skata-gsd.or.id)</li>
-                <li><strong>DPW IV Kalimantan:</strong> Moh. Abdulloh Hadi (dpw4@skata-gsd.or.id)</li>
-                <li><strong>DPW V Sulawesi & Timur:</strong> Muhammad Afdhal Syahrullah (dpw5@skata-gsd.or.id)</li>
+                <li><strong>DPW 1 Sumatera:</strong> Ade Hermansyah (dpw1@skata-gsd.or.id)</li>
+                <li><strong>DPW 2 Jakarta, Banten, Jawa Barat:</strong> Asep Saipul Bahry (dpw2@skata-gsd.or.id)</li>
+                <li><strong>DPW 3 Jateng, Jatim, Bali - Nusra:</strong> Angga Eka Saputra (dpw3@skata-gsd.or.id)</li>
+                <li><strong>DPW 4 Kalimantan:</strong> Moh. Abdulloh Hadi (dpw4@skata-gsd.or.id)</li>
+                <li><strong>DPW 5 Kawasan Timur Indonesia:</strong> Muhammad Afdhal Syahrullah (dpw5@skata-gsd.or.id)</li>
               </ul>
             </div>
           </div>

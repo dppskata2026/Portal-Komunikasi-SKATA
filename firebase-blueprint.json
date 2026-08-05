@@ -38,6 +38,20 @@
         "status": { "type": "string" },
         "createdAt": { "type": "string" }
       }
+    },
+    "skata_regulations": {
+      "title": "SKATA Regulations Database",
+      "description": "Official AD, ART, and PKB V regulations database used as knowledge base for Sahabat SKATA AI",
+      "properties": {
+        "docId": { "type": "string" },
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "number": { "type": "string" },
+        "effectiveDate": { "type": "string" },
+        "summary": { "type": "string" },
+        "chapters": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      }
     }
   },
   "securityRules": [
@@ -57,6 +71,13 @@
     },
     {
       "collection": "memberships",
+      "allow": {
+        "read": true,
+        "write": true
+      }
+    },
+    {
+      "collection": "skata_regulations",
       "allow": {
         "read": true,
         "write": true

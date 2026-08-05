@@ -126,7 +126,7 @@ export const dpwList = [
   {
     id: "DPW-01",
     temporaryName: "DPW 1",
-    officialName: "DPW I - Sumatera",
+    officialName: "DPW 1 Sumatera",
     chairman: "ADE HERMANSYAH",
     secretary: null,
     treasurer: null,
@@ -137,7 +137,7 @@ export const dpwList = [
   {
     id: "DPW-02",
     temporaryName: "DPW 2",
-    officialName: "DPW II - Jakarta, Banten, Jawa Barat",
+    officialName: "DPW 2 Jakarta, Banten, Jawa Barat",
     chairman: "ASEP SAIPUL BAHRY",
     secretary: null,
     treasurer: null,
@@ -148,7 +148,7 @@ export const dpwList = [
   {
     id: "DPW-03",
     temporaryName: "DPW 3",
-    officialName: "DPW III - Jateng, Jatim, Bali - Nusra",
+    officialName: "DPW 3 Jateng, Jatim, Bali - Nusra",
     chairman: "ANGGA EKA SAPUTRA",
     secretary: null,
     treasurer: null,
@@ -159,7 +159,7 @@ export const dpwList = [
   {
     id: "DPW-04",
     temporaryName: "DPW 4",
-    officialName: "DPW IV - Kalimantan",
+    officialName: "DPW 4 Kalimantan",
     chairman: "MOH. ABDULLOH HADI",
     secretary: null,
     treasurer: null,
@@ -170,7 +170,7 @@ export const dpwList = [
   {
     id: "DPW-05",
     temporaryName: "DPW 5",
-    officialName: "DPW V - Kawasan Timur Indonesia",
+    officialName: "DPW 5 Kawasan Timur Indonesia",
     chairman: "MUHAMMAD AFDHAL SYAHRULLAH",
     secretary: null,
     treasurer: null,

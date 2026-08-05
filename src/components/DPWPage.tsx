@@ -91,7 +91,7 @@ export function DPWPage({ onBack, selectedId, navigate }: DPWPageProps) {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ color: '#555', fontSize: '15px' }}>Total Anggota Terdaftar:</span>
                 <strong style={{ color: currentDpw.memberCount !== null ? '#111' : '#999' }}>
-                  {currentDpw.memberCount !== null ? `${currentDpw.memberCount} Jiwa` : 'Data belum tersedia'}
+                  {currentDpw.memberCount !== null ? `${currentDpw.memberCount} Anggota` : 'Data belum tersedia'}
                 </strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -192,7 +192,7 @@ export function DPWPage({ onBack, selectedId, navigate }: DPWPageProps) {
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>Total Anggota:</span>
-                    <strong style={{ color: '#444' }}>{dpw.memberCount !== null ? `${dpw.memberCount} Jiwa` : 'Data belum tersedia'}</strong>
+                    <strong style={{ color: '#444' }}>{dpw.memberCount !== null ? `${dpw.memberCount} Anggota` : 'Data belum tersedia'}</strong>
                   </div>
                 </div>
               </div>

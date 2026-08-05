@@ -1,17 +1,21 @@
 import {
   collection,
   doc,
+  setDoc,
   addDoc,
   deleteDoc,
+  getDocs,
   onSnapshot,
   query
 } from 'firebase/firestore';
 import { db } from './firebase';
+import { SKATA_REGULATIONS_DATABASE, SkataRegulationDoc } from '../data/skataRegulationsDatabase';
 
 // Collection Names
 export const NEWS_COLLECTION = 'news_articles';
 export const ASPIRATIONS_COLLECTION = 'aspirations';
 export const MEMBERSHIPS_COLLECTION = 'memberships';
+export const REGULATIONS_COLLECTION = 'skata_regulations';
 
 // Interfaces
 export interface NewsArticle {
@@ -180,5 +184,53 @@ export async function saveMembershipSubmissionFirebase(data: any): Promise<boole
   } catch (err) {
     console.error('Error saving membership to Firestore:', err);
     return false;
+  }
+}
+
+// ---------------- SKATA REGULATIONS (AD, ART, PKB V) ----------------
+export async function seedRegulationsToFirebase(): Promise<boolean> {
+  try {
+    for (const regDoc of SKATA_REGULATIONS_DATABASE) {
+      const docRef = doc(db, REGULATIONS_COLLECTION, regDoc.id);
+      await setDoc(docRef, {
+        ...regDoc,
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+    }
+    console.log('SKATA Regulations (AD, ART, PKB V) successfully synced to Firebase Firestore.');
+    return true;
+  } catch (err) {
+    console.warn('Error seeding SKATA Regulations to Firestore:', err);
+    return false;
+  }
+}
+
+export function subscribeRegulations(callback: (items: SkataRegulationDoc[]) => void) {
+  try {
+    const q = query(collection(db, REGULATIONS_COLLECTION));
+    return onSnapshot(
+      q,
+      (snapshot) => {
+        const items: SkataRegulationDoc[] = [];
+        snapshot.forEach((docSnap) => {
+          items.push({ id: docSnap.id, ...docSnap.data() } as SkataRegulationDoc);
+        });
+        if (items.length === 0) {
+          // If empty in Firestore, trigger seed and pass local fallback
+          seedRegulationsToFirebase();
+          callback(SKATA_REGULATIONS_DATABASE);
+        } else {
+          callback(items);
+        }
+      },
+      (error) => {
+        console.warn('Firestore regulations listener warning, using fallback:', error);
+        callback(SKATA_REGULATIONS_DATABASE);
+      }
+    );
+  } catch (err) {
+    console.warn('Error subscribing to regulations:', err);
+    callback(SKATA_REGULATIONS_DATABASE);
+    return () => {};
   }
 }

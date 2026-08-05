@@ -216,11 +216,11 @@ export const TotalAnggotaTable: React.FC = () => {
 
     return [
       { id: 'DPP', code: 'DPP', name: 'DPP Kantor Pusat', color: '#0284c7', bg: '#f0f9ff', border: '#bae6fd', count: counts['DPP'], percent: Math.round((counts['DPP'] / total) * 100), barWidth: Math.max(Math.round((counts['DPP'] / maxVal) * 100), counts['DPP'] > 0 ? 8 : 2) },
-      { id: 'DPW 1', code: 'DPW 1', name: 'DPW I - Sumatera', color: '#d97706', bg: '#fffbeb', border: '#fde68a', count: counts['DPW 1'], percent: Math.round((counts['DPW 1'] / total) * 100), barWidth: Math.max(Math.round((counts['DPW 1'] / maxVal) * 100), counts['DPW 1'] > 0 ? 8 : 2) },
-      { id: 'DPW 2', code: 'DPW 2', name: 'DPW II - Jakarta, Banten, Jabar', color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0', count: counts['DPW 2'], percent: Math.round((counts['DPW 2'] / total) * 100), barWidth: Math.max(Math.round((counts['DPW 2'] / maxVal) * 100), counts['DPW 2'] > 0 ? 8 : 2) },
-      { id: 'DPW 3', code: 'DPW 3', name: 'DPW III - Jateng, Jatim, Bali-Nusra', color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe', count: counts['DPW 3'], percent: Math.round((counts['DPW 3'] / total) * 100), barWidth: Math.max(Math.round((counts['DPW 3'] / maxVal) * 100), counts['DPW 3'] > 0 ? 8 : 2) },
-      { id: 'DPW 4', code: 'DPW 4', name: 'DPW IV - Kalimantan', color: '#9333ea', bg: '#faf5ff', border: '#e9d5ff', count: counts['DPW 4'], percent: Math.round((counts['DPW 4'] / total) * 100), barWidth: Math.max(Math.round((counts['DPW 4'] / maxVal) * 100), counts['DPW 4'] > 0 ? 8 : 2) },
-      { id: 'DPW 5', code: 'DPW 5', name: 'DPW V - Kawasan Timur Indonesia', color: '#dc2626', bg: '#fef2f2', border: '#fecaca', count: counts['DPW 5'], percent: Math.round((counts['DPW 5'] / total) * 100), barWidth: Math.max(Math.round((counts['DPW 5'] / maxVal) * 100), counts['DPW 5'] > 0 ? 8 : 2) },
+      { id: 'DPW 1', code: 'DPW 1', name: 'DPW 1 Sumatera', color: '#d97706', bg: '#fffbeb', border: '#fde68a', count: counts['DPW 1'], percent: Math.round((counts['DPW 1'] / total) * 100), barWidth: Math.max(Math.round((counts['DPW 1'] / maxVal) * 100), counts['DPW 1'] > 0 ? 8 : 2) },
+      { id: 'DPW 2', code: 'DPW 2', name: 'DPW 2 Jakarta, Banten, Jawa Barat', color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0', count: counts['DPW 2'], percent: Math.round((counts['DPW 2'] / total) * 100), barWidth: Math.max(Math.round((counts['DPW 2'] / maxVal) * 100), counts['DPW 2'] > 0 ? 8 : 2) },
+      { id: 'DPW 3', code: 'DPW 3', name: 'DPW 3 Jateng, Jatim, Bali - Nusra', color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe', count: counts['DPW 3'], percent: Math.round((counts['DPW 3'] / total) * 100), barWidth: Math.max(Math.round((counts['DPW 3'] / maxVal) * 100), counts['DPW 3'] > 0 ? 8 : 2) },
+      { id: 'DPW 4', code: 'DPW 4', name: 'DPW 4 Kalimantan', color: '#9333ea', bg: '#faf5ff', border: '#e9d5ff', count: counts['DPW 4'], percent: Math.round((counts['DPW 4'] / total) * 100), barWidth: Math.max(Math.round((counts['DPW 4'] / maxVal) * 100), counts['DPW 4'] > 0 ? 8 : 2) },
+      { id: 'DPW 5', code: 'DPW 5', name: 'DPW 5 Kawasan Timur Indonesia', color: '#dc2626', bg: '#fef2f2', border: '#fecaca', count: counts['DPW 5'], percent: Math.round((counts['DPW 5'] / total) * 100), barWidth: Math.max(Math.round((counts['DPW 5'] / maxVal) * 100), counts['DPW 5'] > 0 ? 8 : 2) },
     ];
   }, [members]);
 
@@ -413,7 +413,7 @@ export const TotalAnggotaTable: React.FC = () => {
               Total Anggota Aktif
             </span>
             <div style={{ fontSize: '28px', fontWeight: 800, lineHeight: 1.1, marginTop: '2px' }}>
-              {members.length} <span style={{ fontSize: '15px', fontWeight: 500 }}>Jiwa</span>
+              {members.length} <span style={{ fontSize: '15px', fontWeight: 500 }}>Anggota</span>
             </div>
             <div style={{ fontSize: '11px', marginTop: '6px', fontWeight: 600, background: 'rgba(255,255,255,0.22)', color: '#ffffff', padding: '2px 8px', borderRadius: '4px', display: 'inline-block' }}>
               📅 Cut Off Periode Juni 2026
@@ -600,7 +600,7 @@ export const TotalAnggotaTable: React.FC = () => {
                       {item.percent}%
                     </span>
                     <strong style={{ fontSize: '15px', color: item.color, fontWeight: 800 }}>
-                      {item.count} <span style={{ fontSize: '12px', fontWeight: 500, color: '#64748b' }}>Jiwa</span>
+                      {item.count} <span style={{ fontSize: '12px', fontWeight: 500, color: '#64748b' }}>Anggota</span>
                     </strong>
                   </div>
                 </div>
@@ -671,7 +671,7 @@ export const TotalAnggotaTable: React.FC = () => {
                 cursor: 'pointer'
               }}
             >
-              {r.code}: {r.count} Jiwa
+              {r.code}: {r.count} Anggota
             </button>
           ))}
         </div>

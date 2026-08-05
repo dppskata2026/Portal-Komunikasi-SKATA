@@ -540,7 +540,7 @@ function ExecutiveDashboard({ navigate }: { navigate: (path: string) => void }) 
           icon={UsersRound}
           title="Total Anggota Aktif"
           value={activeMemberCount}
-          suffix=" Jiwa"
+          suffix=" Anggota"
           subtitle="Terdaftar secara sistem"
           href="/layanan/keanggotaan"
           onClick={() => navigate('/layanan/keanggotaan')}

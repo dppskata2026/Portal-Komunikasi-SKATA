@@ -318,8 +318,8 @@ export function DotMapFull() {
                   opacity={isActive ? 0.95 : 0.85}
                 >
                   {dpw.id === 'DPW-01' && 'Sumatera'}
-                  {dpw.id === 'DPW-02' && 'Jakarta, Banten, Jabar'}
-                  {dpw.id === 'DPW-03' && 'Jateng, Jatim, Bali-Nusra'}
+                  {dpw.id === 'DPW-02' && 'Jakarta, Banten, Jawa Barat'}
+                  {dpw.id === 'DPW-03' && 'Jateng, Jatim, Bali - Nusra'}
                   {dpw.id === 'DPW-04' && 'Kalimantan'}
                   {dpw.id === 'DPW-05' && 'Kawasan Timur Indonesia'}
                 </text>

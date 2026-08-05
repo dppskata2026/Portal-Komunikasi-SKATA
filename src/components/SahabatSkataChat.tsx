@@ -17,8 +17,12 @@ import {
   ThumbsUp,
   ThumbsDown,
   ArrowLeft,
-  Info
+  Info,
+  Database,
+  BookOpen,
+  FileText
 } from 'lucide-react';
+import { seedRegulationsToFirebase } from '../lib/firestoreService';
 
 export interface ChatMessage {
   id: string;
@@ -34,11 +38,11 @@ interface SahabatSkataChatProps {
 }
 
 const SUGGESTED_PROMPTS = [
-  'Bagaimana cara membuat e-KTA Digital SKATA?',
-  'Apa saja hak & fasilitas kesejahteraan anggota?',
-  'Bagaimana alur pengajuan konsultasi & advokasi hukum?',
-  'Siapa saja susunan Pengurus DPP SKATA 2026–2028?',
-  'Bagaimana menyampaikan aspirasi & aduan anggota?'
+  'Apa saja hak cuti tahunan, CAP, & MTM di PKB V 2025–2027?',
+  'Bagaimana ketentuan Kenaikan Gaji, THR & Bonus di PKB V?',
+  'Apa isi Anggaran Dasar (AD) & Anggaran Rumah Tangga (ART) SKATA?',
+  'Bagaimana alur advokasi hukum jika terjadi perselisihan kerja?',
+  'Siapa saja Susunan Pengurus DPP & DPW SKATA 2026–2028?'
 ];
 
 export function SahabatSkataChat({ mode = 'standalone', onClose, onBack }: SahabatSkataChatProps) {
@@ -46,7 +50,7 @@ export function SahabatSkataChat({ mode = 'standalone', onClose, onBack }: Sahab
     {
       id: 'welcome-1',
       role: 'assistant',
-      content: `Salam SKATA! **Solid, Mandiri, Sejahtera!** ✊\n\nSaya **Sahabat SKATA**, asisten AI cerdas resmi Serikat Karyawan GSD.\n\nAda yang bisa saya bantu hari ini terkait layanan keanggotaan, e-KTA, advokasi hukum, iuran, atau program kerja SKATA?`,
+      content: `Salam SKATA! **Solid, Mandiri, Sejahtera!** ✊\n\nSaya **Sahabat SKATA**, asisten AI cerdas resmi Serikat Karyawan GSD.\n\nSaya telah terhubung langsung ke **Database Firebase Firestore** yang memuat seluruh dokumen resmi:\n- **Anggaran Dasar (AD) SKATA 2026**\n- **Anggaran Rumah Tangga (ART) SKATA 2026**\n- **Perjanjian Kerja Bersama V (PKB V) SKATA & GSD 2025–2027** (Disahkan Kemenaker RI)\n\nSilakan ajukan pertanyaan seputar hak pekerja, aturan cuti, THR, advokasi, iuran, e-KTA, atau pasal regulasi SKATA!`,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -55,7 +59,15 @@ export function SahabatSkataChat({ mode = 'standalone', onClose, onBack }: Sahab
   const [isLoading, setIsLoading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [dbSynced, setDbSynced] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Seed and sync regulations database to Firebase Firestore on mount
+    seedRegulationsToFirebase().then((success) => {
+      if (success) setDbSynced(true);
+    });
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -232,10 +244,19 @@ export function SahabatSkataChat({ mode = 'standalone', onClose, onBack }: Sahab
         </div>
       </div>
 
-      {/* Info Notice */}
-      <div className="skata-chat-info-banner">
-        <ShieldCheck size={14} className="banner-icon" />
-        <span>Diperkuat oleh Google Gemini AI. Didesain untuk memberikan informasi akurat seputar SKATA & Ketenagakerjaan.</span>
+      {/* Info Notice & Database Reference Indicator */}
+      <div className="skata-chat-info-banner flex-col gap-1.5 align-start" style={{ display: 'flex', flexDirection: 'column', gap: '6px', padding: '10px 16px', background: 'rgba(2, 132, 199, 0.08)', borderBottom: '1px solid rgba(2, 132, 199, 0.15)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: 600, color: 'var(--skata-navy)' }}>
+          <Database size={14} style={{ color: '#0284c7' }} />
+          <span>Database Referensi: Firebase Firestore (AD, ART & PKB V SKATA)</span>
+          <span style={{ marginLeft: 'auto', fontSize: '10px', background: dbSynced ? '#dcfce7' : '#fef3c7', color: dbSynced ? '#15803d' : '#b45309', padding: '2px 8px', borderRadius: '12px', fontWeight: 700 }}>
+            {dbSynced ? '● Database Firestore Aktif' : '○ Menghubungkan Firebase...'}
+          </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', opacity: 0.85 }}>
+          <ShieldCheck size={13} className="banner-icon" />
+          <span>Diperkuat Google Gemini AI & Referensi Hukum Ketenagakerjaan PT GSD</span>
+        </div>
       </div>
 
       {/* Messages Body */}
