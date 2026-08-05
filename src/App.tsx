@@ -52,6 +52,7 @@ import {
 
 import { organizationProfile } from './data/skataMasterData';
 import { DotMap } from './components/DotMap';
+import skataLogoOfficial from './assets/skata-logo-official.png';
 
 type IconComponent = typeof User;
 
@@ -91,13 +92,22 @@ const navItems = [
 ];
 
 function OfficialSkataLogo({ className = '' }: { className?: string }) {
+  const [logoSrc, setLogoSrc] = useState(skataLogoOfficial);
+
   return (
     <img
       className={className}
-      src="/assets/skata-logo-official.png"
+      src={logoSrc}
       alt="Logo resmi SKATA — Serikat Karyawan GSD"
-      width={630}
-      height={741}
+      onError={() => {
+        if (logoSrc === skataLogoOfficial) {
+          setLogoSrc('/assets/skata-logo-official.png');
+        } else if (logoSrc === '/assets/skata-logo-official.png') {
+          setLogoSrc('/skata-logo-official.png');
+        } else if (logoSrc === '/skata-logo-official.png') {
+          setLogoSrc('/logo.png');
+        }
+      }}
     />
   );
 }
@@ -977,7 +987,11 @@ export default function App() {
         const anchor = target.closest('a');
         if (anchor) {
           const href = anchor.getAttribute('href');
-          if (href && href.startsWith('/') && !href.startsWith('//')) {
+          const isDownload = anchor.hasAttribute('download');
+          const isTargetBlank = anchor.getAttribute('target') === '_blank';
+          const isStaticFile = href && (href.startsWith('/assets/') || href.match(/\.(pdf|png|jpe?g|svg|zip|docx?|xlsx?)$/i));
+
+          if (href && href.startsWith('/') && !href.startsWith('//') && !isDownload && !isTargetBlank && !isStaticFile) {
             e.preventDefault();
             navigate(href);
           }

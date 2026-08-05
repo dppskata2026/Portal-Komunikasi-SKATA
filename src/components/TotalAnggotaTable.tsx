@@ -97,16 +97,32 @@ export const TotalAnggotaTable: React.FC = () => {
         });
 
         setMembers((prev) => {
-          if (prev.length === 0) {
+          let currentLocal = prev;
+          if (currentLocal.length === 0) {
+            try {
+              const stored = localStorage.getItem('skata_total_active_members');
+              if (stored) {
+                const parsed = JSON.parse(stored);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                  currentLocal = parsed;
+                }
+              }
+            } catch {
+              // ignore
+            }
+          }
+
+          if (currentLocal.length === 0) {
             safeSetLocalStorage('skata_total_active_members', mappedFirestore);
             return mappedFirestore;
           }
-          // Preserve existing user/uploaded members position first!
-          const existingNIKs = new Set(prev.map(m => m.nik));
-          const newFromFirestore = mappedFirestore.filter(d => !existingNIKs.has(d.nik));
-          if (newFromFirestore.length === 0) return prev;
 
-          const merged = [...prev, ...newFromFirestore];
+          // Preserve existing user/uploaded members position and data first!
+          const existingNIKs = new Set(currentLocal.map(m => m.nik));
+          const newFromFirestore = mappedFirestore.filter(d => !existingNIKs.has(d.nik));
+          if (newFromFirestore.length === 0) return currentLocal;
+
+          const merged = [...currentLocal, ...newFromFirestore];
           safeSetLocalStorage('skata_total_active_members', merged);
           return merged;
         });

@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ArrowLeft, FileText, Search, Download, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, FileText, Search, Download, ShieldAlert, Eye } from 'lucide-react';
+import { PkbViewerModal } from './PkbViewerModal';
 
 interface DokumenPageProps {
   onBack: () => void;
@@ -15,9 +16,22 @@ interface DocumentItem {
   file: string | null;
   version: string;
   uploadDate: string | null;
+  isPkb?: boolean;
 }
 
 const documentsData: DocumentItem[] = [
+  {
+    title: "PERJANJIAN KERJA BERSAMA V ANTARA SKATA DENGAN GSD",
+    category: "Perjanjian Kerja Bersama",
+    docNumber: "001/HK.810/SKT-000/2025 | 1126/HK.810/GSD-000/2025",
+    effectiveDate: "2025-11-12",
+    period: "2025–2027",
+    accessLevel: "Anggota Terverifikasi",
+    file: "PERJANJIAN_KERJA_BERSAMA_V_SKATA_GSD.pdf",
+    version: "PKB V Resmi 2025-2027",
+    uploadDate: "2026-01-02",
+    isPkb: true
+  },
   {
     title: "Anggaran Dasar (AD) SKATA GSD",
     category: "Anggaran Dasar",
@@ -38,17 +52,6 @@ const documentsData: DocumentItem[] = [
     accessLevel: "Anggota Terverifikasi",
     file: null,
     version: "v2.0",
-    uploadDate: null
-  },
-  {
-    title: "Draf Perjanjian Kerja Bersama (PKB) GSD",
-    category: "Perjanjian Kerja Bersama",
-    docNumber: "PKB/GSD-SKATA/2026-2028",
-    effectiveDate: null,
-    period: "2026–2028",
-    accessLevel: "Anggota Terverifikasi",
-    file: null,
-    version: "Draft v1.2",
     uploadDate: null
   },
   {
@@ -78,6 +81,7 @@ const documentsData: DocumentItem[] = [
 export function DokumenPage({ onBack }: DokumenPageProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Semua');
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
 
   const categories = [
     'Semua',
@@ -208,15 +212,31 @@ export function DokumenPage({ onBack }: DokumenPageProps) {
                 </div>
               </div>
 
-              <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                 {doc.file ? (
-                  <button
-                    onClick={() => alert(`Mengunduh berkas: ${doc.file}`)}
-                    className="button primary"
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
-                  >
-                    <Download size={15} /> Unduh Berkas
-                  </button>
+                  <>
+                    <button
+                      onClick={() => {
+                        if (doc.isPkb) {
+                          setIsViewerOpen(true);
+                        } else {
+                          window.open(`/assets/${doc.file}`, '_blank');
+                        }
+                      }}
+                      className="button secondary"
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a' }}
+                    >
+                      <Eye size={15} /> Lihat Dokumen
+                    </button>
+                    <a
+                      href={`/assets/${doc.file}`}
+                      download={doc.file}
+                      className="button primary"
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', textDecoration: 'none', fontSize: '13px' }}
+                    >
+                      <Download size={15} /> Unduh Berkas
+                    </a>
+                  </>
                 ) : (
                   <div style={{
                     fontSize: '13px',
@@ -252,6 +272,13 @@ export function DokumenPage({ onBack }: DokumenPageProps) {
         </div>
 
       </div>
+
+      {/* Interactive PKB V Document Viewer Modal */}
+      <PkbViewerModal
+        isOpen={isViewerOpen}
+        onClose={() => setIsViewerOpen(false)}
+        pdfUrl="/assets/PERJANJIAN_KERJA_BERSAMA_V_SKATA_GSD.pdf"
+      />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { subscribeNewsArticles, addNewsArticleFirebase, deleteNewsArticleFirebase, safeSetLocalStorage } from '../lib/firestoreService';
 import { SkataWordmark } from './SkataWordmark';
+import skataLogoOfficial from '../assets/skata-logo-official.png';
 import {
   BookOpenText,
   UsersRound,
@@ -448,7 +449,12 @@ export function EKtaPage({ onBack }: { onBack: () => void }) {
           <div className="ekta-card">
             <div className="ekta-card-bg-glow" />
             <div className="ekta-card-header">
-              <img src="/assets/skata-logo-official.png" className="ekta-card-logo" alt="SKATA" />
+              <img
+                src={skataLogoOfficial}
+                className="ekta-card-logo"
+                alt="SKATA"
+                onError={(e) => { (e.target as HTMLImageElement).src = '/assets/skata-logo-official.png'; }}
+              />
               <SkataWordmark size="sm" />
               <span className="ekta-badge-type">MEMBER</span>
             </div>
@@ -821,21 +827,30 @@ export function DownloadPage({ onBack }: { onBack: () => void }) {
   const [activeDlId, setActiveDlId] = useState<string | null>(null);
 
   const docs = [
-    { id: 'DOC-01', name: 'Anggaran Dasar & Anggaran Rumah Tangga (AD/ART) SKATA GSD', type: 'PDF Regulasi', size: '2.4 MB' },
-    { id: 'DOC-02', name: 'Buku Saku Perjanjian Kerja Bersama (PKB) GSD Terbaru 2026', type: 'PDF PKB', size: '5.1 MB' },
-    { id: 'DOC-03', name: 'Formulir Pengajuan Dana Kesejahteraan Anggota DPP', type: 'Dokumen Formulir', size: '480 KB' },
-    { id: 'DOC-04', name: 'Formulir Permohonan Advokasi Bantuan Hukum Fisik', type: 'Dokumen Formulir', size: '512 KB' },
-    { id: 'DOC-05', name: 'Panduan Registrasi Aplikasi Portal Anggota SKATA', type: 'PDF Panduan', size: '1.2 MB' },
+    { id: 'DOC-01', name: 'Anggaran Dasar & Anggaran Rumah Tangga (AD/ART) SKATA GSD', type: 'PDF Regulasi', size: '2.4 MB', file: null },
+    { id: 'DOC-02', name: 'Perjanjian Kerja Bersama V (PKB V) SKATA DENGAN GSD (Legalisasi Kemenaker RI)', type: 'PDF PKB', size: '13.8 KB', file: 'PERJANJIAN_KERJA_BERSAMA_V_SKATA_GSD.pdf' },
+    { id: 'DOC-03', name: 'Formulir Pengajuan Dana Kesejahteraan Anggota DPP', type: 'Dokumen Formulir', size: '480 KB', file: null },
+    { id: 'DOC-04', name: 'Formulir Permohonan Advokasi Bantuan Hukum Fisik', type: 'Dokumen Formulir', size: '512 KB', file: null },
+    { id: 'DOC-05', name: 'Panduan Registrasi Aplikasi Portal Anggota SKATA', type: 'PDF Panduan', size: '1.2 MB', file: null },
   ];
 
   const filteredDocs = docs.filter((d) => d.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
-  const handleDownload = (id: string) => {
-    setActiveDlId(id);
-    setTimeout(() => {
-      setActiveDlId(null);
-      alert('File berhasil diunduh dan disimpan ke folder Download Anda!');
-    }, 1200);
+  const handleDownload = (doc: typeof docs[0]) => {
+    if (doc.file) {
+      const link = document.createElement('a');
+      link.href = `/assets/${doc.file}`;
+      link.download = doc.file;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      setActiveDlId(doc.id);
+      setTimeout(() => {
+        setActiveDlId(null);
+        alert('File berhasil diunduh dan disimpan ke folder Download Anda!');
+      }, 1200);
+    }
   };
 
   return (
@@ -877,7 +892,7 @@ export function DownloadPage({ onBack }: { onBack: () => void }) {
                   <td>
                     <button
                       className="button primary inline-dl-btn"
-                      onClick={() => handleDownload(d.id)}
+                      onClick={() => handleDownload(d)}
                       disabled={activeDlId === d.id}
                     >
                       {activeDlId === d.id ? 'Mengunduh...' : '📥 Unduh Berkas'}
@@ -1794,7 +1809,12 @@ export function LoginPage({ onBack }: { onBack: () => void }) {
         {!loggedIn ? (
           <form onSubmit={handleLoginSubmit} className="premium-form">
             <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-              <img src="/assets/skata-logo-official.png" style={{ width: '80px', height: 'auto', marginBottom: '12px' }} alt="SKATA" />
+              <img
+                src={skataLogoOfficial}
+                style={{ width: '80px', height: 'auto', marginBottom: '12px' }}
+                alt="SKATA"
+                onError={(e) => { (e.target as HTMLImageElement).src = '/assets/skata-logo-official.png'; }}
+              />
               <h2>Sistem Layanan Anggota</h2>
               <p style={{ fontSize: '13px', color: '#666' }}>Silakan login menggunakan NIK atau email terdaftar Anda.</p>
             </div>

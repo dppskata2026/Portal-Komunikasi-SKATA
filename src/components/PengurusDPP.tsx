@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { dppBoard, dewanPembina, organizationProfile } from '../data/skataMasterData';
-import { ArrowLeft, Users, Shield, Award, Camera, X, CheckCircle2, Briefcase, Building2, MapPin, Phone, Mail, ShieldCheck, UserCheck } from 'lucide-react';
+import { ArrowLeft, Users, Shield, Award, X, CheckCircle2, Briefcase, Building2, MapPin, Phone, Mail, ShieldCheck, UserCheck, Lock } from 'lucide-react';
 import { safeSetLocalStorage } from '../lib/firestoreService';
 
 interface PengurusDPPProps {
@@ -23,73 +23,32 @@ interface SelectedMemberProfile {
 }
 
 export function PengurusDPP({ onBack }: PengurusDPPProps) {
-  // Photos stored by member name
-  const [photos, setPhotos] = useState<Record<string, string>>(() => {
+  // Photos stored by member name with triple-lock backup protection to prevent re-seeding resets
+  const [photos] = useState<Record<string, string>>(() => {
     try {
       const stored = localStorage.getItem('skata_dpp_member_photos');
-      return stored ? JSON.parse(stored) : {};
+      const locked = localStorage.getItem('skata_dpp_member_photos_locked');
+      const seedLocked = localStorage.getItem('skata_dpp_photos_permanent');
+      const primary = stored ? JSON.parse(stored) : {};
+      const backup = locked ? JSON.parse(locked) : {};
+      const seed = seedLocked ? JSON.parse(seedLocked) : {};
+      return { ...seed, ...backup, ...primary };
     } catch {
       return {};
     }
   });
 
+  // Ensure current photos state is locked across all storage backups on mount
+  React.useEffect(() => {
+    if (Object.keys(photos).length > 0) {
+      safeSetLocalStorage('skata_dpp_member_photos', photos);
+      safeSetLocalStorage('skata_dpp_member_photos_locked', photos);
+      safeSetLocalStorage('skata_dpp_photos_permanent', photos);
+    }
+  }, [photos]);
+
   // Currently selected member for detail profile modal
   const [selectedProfile, setSelectedProfile] = useState<SelectedMemberProfile | null>(null);
-
-  // Target member name being edited for photo upload
-  const [uploadTargetName, setUploadTargetName] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Save photos to localStorage whenever updated
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !uploadTargetName) return;
-
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Ukuran file foto maksimal 5MB');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
-      setPhotos((prev) => {
-        const updated = { ...prev, [uploadTargetName]: result };
-        safeSetLocalStorage('skata_dpp_member_photos', updated);
-        return updated;
-      });
-
-      // Update modal photo if open
-      if (selectedProfile && selectedProfile.name === uploadTargetName) {
-        setSelectedProfile((prev) => prev ? { ...prev, photoUrl: result } : null);
-      }
-
-      setUploadTargetName(null);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const triggerUploadFor = (memberName: string, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setUploadTargetName(memberName);
-    setTimeout(() => {
-      fileInputRef.current?.click();
-    }, 50);
-  };
-
-  const handleRemovePhoto = (memberName: string, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setPhotos((prev) => {
-      const updated = { ...prev };
-      delete updated[memberName];
-      safeSetLocalStorage('skata_dpp_member_photos', updated);
-      return updated;
-    });
-
-    if (selectedProfile && selectedProfile.name === memberName) {
-      setSelectedProfile((prev) => prev ? { ...prev, photoUrl: undefined } : null);
-    }
-  };
 
   // Find member detail from local storage or construct realistic SKATA member data
   const handleOpenMemberDetail = (member: { name: string; position: string; group?: string; department?: string }) => {
@@ -130,8 +89,9 @@ export function PengurusDPP({ onBack }: PengurusDPPProps) {
     const defaultUnit = matchedUnit || (member.department ? `Unit ${member.department}` : 'DPP SKATA Kantor Pusat');
     const defaultLocation = matchedLocation || 'Gedung Menara Multimedia, Kebon Sirih Jakarta';
     const defaultDpw = matchedDpw || 'DPP (Kantor Pusat)';
-    const defaultEmail = matchedEmail || `${member.name.toLowerCase().replace(/\s+/g, '.')}@telkom-gsd.co.id`;
-    const defaultPhone = matchedPhone || '+62 812-8346-6000';
+    // Phone number and email info cleared for board members as requested
+    const defaultEmail = '-';
+    const defaultPhone = '-';
 
     setSelectedProfile({
       name: member.name,
@@ -149,7 +109,7 @@ export function PengurusDPP({ onBack }: PengurusDPPProps) {
     });
   };
 
-  // Component to render Avatar with Upload Menu Overlay
+  // Component to render Avatar
   const RenderAvatar = ({ name, size = 56, isClickable = true }: { name: string; size?: number; isClickable?: boolean }) => {
     const photo = photos[name];
     const initials = name
@@ -185,46 +145,12 @@ export function PengurusDPP({ onBack }: PengurusDPPProps) {
             <span>{initials}</span>
           )}
         </div>
-
-        {/* Upload Camera Badge Button */}
-        <button
-          onClick={(e) => triggerUploadFor(name, e)}
-          style={{
-            position: 'absolute',
-            bottom: '-2px',
-            right: '-2px',
-            width: `${Math.round(size * 0.42)}px`,
-            height: `${Math.round(size * 0.42)}px`,
-            borderRadius: '50%',
-            background: '#0284c7',
-            color: '#ffffff',
-            border: '2px solid #ffffff',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease'
-          }}
-          title={`Ubah / Upload foto profil ${name}`}
-        >
-          <Camera size={Math.round(size * 0.22)} />
-        </button>
       </div>
     );
   };
 
   return (
     <div className="subpage-wrapper container" style={{ paddingTop: '24px', paddingBottom: '80px' }}>
-      {/* Hidden File Input for Photo Upload */}
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handlePhotoUpload}
-        accept="image/*"
-        style={{ display: 'none' }}
-      />
-
       <button
         className="back-link"
         onClick={onBack}
@@ -251,14 +177,31 @@ export function PengurusDPP({ onBack }: PengurusDPPProps) {
           borderRadius: '16px',
           padding: '32px'
         }}>
-          <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--red, #ff2424)', letterSpacing: '2px', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
-            Dewan Pengurus Pusat
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '12px' }}>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--red, #ff2424)', letterSpacing: '2px', textTransform: 'uppercase' }}>
+              Dewan Pengurus Pusat
+            </span>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              color: '#15803d',
+              padding: '6px 14px',
+              borderRadius: '20px',
+              fontSize: '12px',
+              fontWeight: 700,
+              boxShadow: '0 2px 5px rgba(22, 128, 61, 0.08)'
+            }}>
+              <Lock size={14} /> Foto Profil & Struktur Terkunci Permanen
+            </div>
+          </div>
           <h1 style={{ fontSize: '28px', fontWeight: 800, color: '#111', margin: 0 }}>
             Pengurus DPP {organizationProfile.shortName} Periode {organizationProfile.activePeriod}
           </h1>
           <p style={{ fontSize: '15px', color: '#555', marginTop: '8px', lineHeight: 1.5 }}>
-            Daftar resmi fungsionaris kepengurusan tingkat pusat Serikat Karyawan Graha Sarana Duta. Seluruh data fungsionaris bersumber langsung dari berita acara ketetapan organisasi. Klik nama pengurus untuk melihat detail profil keanggotaan SKATA atau upload foto profil resmi.
+            Daftar resmi fungsionaris kepengurusan tingkat pusat Serikat Karyawan Graha Sarana Duta. Seluruh data fungsionaris, posisi kepengurusan, dan foto profil masing-masing pengurus telah terkunci secara aman dan permanen. Klik nama pengurus untuk melihat detail profil keanggotaan SKATA.
           </p>
         </div>
 
@@ -304,25 +247,6 @@ export function PengurusDPP({ onBack }: PengurusDPPProps) {
                     <span style={{ fontSize: '12px', color: member.name ? '#16a34a' : '#ff9800', fontWeight: 600 }}>
                       ● {member.name ? member.status : 'Menunggu data resmi'}
                     </span>
-                    {member.name && (
-                      <button
-                        onClick={(e) => triggerUploadFor(member.name, e)}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: '#0284c7',
-                          fontSize: '11px',
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                          padding: 0,
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '3px'
-                        }}
-                      >
-                        <Camera size={12} /> Upload Foto
-                      </button>
-                    )}
                   </div>
                 </div>
               </div>
@@ -391,26 +315,6 @@ export function PengurusDPP({ onBack }: PengurusDPPProps) {
                       <span style={{ fontSize: '12px', color: member.name ? '#16a34a' : '#ff9800', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                         ● {member.name ? 'Aktif' : 'Menunggu penetapan'}
                       </span>
-                      {member.name && (
-                        <button
-                          onClick={(e) => triggerUploadFor(member.name, e)}
-                          style={{
-                            background: '#f0f9ff',
-                            border: '1px solid #bae6fd',
-                            color: '#0284c7',
-                            fontSize: '11px',
-                            fontWeight: 700,
-                            padding: '3px 10px',
-                            borderRadius: '6px',
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px'
-                          }}
-                        >
-                          <Camera size={13} /> Ubah Foto
-                        </button>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -483,23 +387,6 @@ export function PengurusDPP({ onBack }: PengurusDPPProps) {
                             <span style={{ fontSize: '11px', fontWeight: 700, color: '#16a34a', background: '#f0fdf4', padding: '2px 8px', borderRadius: '10px' }}>
                               ● Aktif
                             </span>
-                            <button
-                              onClick={(e) => triggerUploadFor(m.name, e)}
-                              style={{
-                                background: 'none',
-                                border: 'none',
-                                color: '#0284c7',
-                                fontSize: '11px',
-                                fontWeight: 700,
-                                cursor: 'pointer',
-                                padding: 0,
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '2px'
-                              }}
-                            >
-                              <Camera size={11} /> Ubah Foto
-                            </button>
                           </div>
                         </div>
                       </div>
@@ -584,29 +471,6 @@ export function PengurusDPP({ onBack }: PengurusDPPProps) {
               }}>
                 <div style={{ position: 'relative', marginBottom: '14px' }}>
                   <RenderAvatar name={selectedProfile.name} size={90} isClickable={false} />
-                  {selectedProfile.photoUrl && (
-                    <button
-                      onClick={(e) => handleRemovePhoto(selectedProfile.name, e)}
-                      style={{
-                        position: 'absolute',
-                        top: '-4px',
-                        right: '-4px',
-                        background: '#ef4444',
-                        color: '#fff',
-                        border: '2px solid #fff',
-                        borderRadius: '50%',
-                        width: '24px',
-                        height: '24px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer'
-                      }}
-                      title="Hapus Foto Kustom"
-                    >
-                      <X size={14} />
-                    </button>
-                  )}
                 </div>
 
                 <h2 style={{ margin: 0, fontSize: '22px', fontWeight: 800, color: '#0f172a' }}>
@@ -617,27 +481,6 @@ export function PengurusDPP({ onBack }: PengurusDPPProps) {
                 </div>
                 <div style={{ fontSize: '13px', fontFamily: 'monospace', fontWeight: 700, color: '#0284c7', marginTop: '4px' }}>
                   NIK: {selectedProfile.nik}
-                </div>
-
-                <div style={{ marginTop: '10px' }}>
-                  <button
-                    onClick={() => triggerUploadFor(selectedProfile.name)}
-                    style={{
-                      background: '#f0f9ff',
-                      border: '1px solid #bae6fd',
-                      color: '#0284c7',
-                      fontSize: '12px',
-                      fontWeight: 700,
-                      padding: '6px 16px',
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px'
-                    }}
-                  >
-                    <Camera size={14} /> Ubah / Unggah Foto Profil
-                  </button>
                 </div>
               </div>
 
