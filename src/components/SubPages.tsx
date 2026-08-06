@@ -474,7 +474,7 @@ export function EKtaPage({ onBack }: { onBack: () => void }) {
               <input type="text" value={nama} onChange={(e) => setNama(e.target.value.toUpperCase())} maxLength={32} />
             </label>
             <label>
-              Nomor Induk Anggota (NIA)
+              Nomor Induk Karyawan GSD (NIK / NIA)
               <input type="text" value={nik} onChange={(e) => setNik(e.target.value)} maxLength={12} />
             </label>
             <label>
@@ -525,8 +525,8 @@ export function EKtaPage({ onBack }: { onBack: () => void }) {
                 <small>NAMA ANGGOTA</small>
                 <strong>{nama || 'NAMA LENGKAP ANGGOTA'}</strong>
                 
-                <small>NOMOR INDUK ANGGOTA (NIA)</small>
-                <strong>SKATA.{nik || 'XXXXXXXX'}</strong>
+                <small>NIK GSD / NOMOR ANGGOTA (NIA)</small>
+                <strong>{nik || '10002026'}</strong>
 
                 <small>DEWAN PENGURUS WILAYAH</small>
                 <strong>{dpw}</strong>
