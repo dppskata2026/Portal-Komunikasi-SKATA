@@ -8,19 +8,11 @@ import {
   Copy,
   Check,
   ShieldCheck,
-  HelpCircle,
   X,
   Maximize2,
   Minimize2,
-  ChevronRight,
-  MessageSquare,
-  ThumbsUp,
-  ThumbsDown,
   ArrowLeft,
-  Info,
-  Database,
-  BookOpen,
-  FileText
+  Database
 } from 'lucide-react';
 import { seedRegulationsToFirebase } from '../lib/firestoreService';
 import { generateSkataSearchResponse, getRelevantContextForPrompt } from '../lib/skataKnowledgeSearch';
@@ -37,14 +29,6 @@ interface SahabatSkataChatProps {
   onClose?: () => void;
   onBack?: () => void;
 }
-
-const SUGGESTED_PROMPTS = [
-  'Apa saja hak cuti tahunan, CAP, & MTM di PKB V 2025–2027?',
-  'Bagaimana ketentuan Kenaikan Gaji, THR & Bonus di PKB V?',
-  'Apa isi Anggaran Dasar (AD) & Anggaran Rumah Tangga (ART) SKATA?',
-  'Bagaimana alur advokasi hukum jika terjadi perselisihan kerja?',
-  'Siapa saja Susunan Pengurus DPP & DPW SKATA 2026–2028?'
-];
 
 // Local Knowledge Fallback Engine for Sahabat SKATA AI
 async function getFallbackAiResponse(query: string, messages: Array<{ role: string; content: string }>): Promise<string> {
@@ -389,28 +373,6 @@ export function SahabatSkataChat({ mode = 'standalone', onClose, onBack }: Sahab
 
         <div ref={messagesEndRef} />
       </div>
-
-      {/* Suggested Quick Prompts */}
-      {messages.length <= 2 && !isLoading && (
-        <div className="skata-chat-suggestions">
-          <div className="suggestions-header">
-            <HelpCircle size={13} />
-            <span>Rekomendasi Pertanyaan Sering Diajukan:</span>
-          </div>
-          <div className="suggestions-grid">
-            {SUGGESTED_PROMPTS.map((promptText, idx) => (
-              <button
-                key={idx}
-                className="suggestion-chip"
-                onClick={() => handleSend(promptText)}
-              >
-                <span>{promptText}</span>
-                <ChevronRight size={13} className="chip-arrow" />
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Input Box */}
       <form
