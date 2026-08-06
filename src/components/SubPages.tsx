@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
-import { subscribeNewsArticles, addNewsArticleFirebase, deleteNewsArticleFirebase, safeSetLocalStorage } from '../lib/firestoreService';
+import { subscribeNewsArticles, addNewsArticleFirebase, deleteNewsArticleFirebase, safeSetLocalStorage, subscribeMemberships } from '../lib/firestoreService';
+import { useAuth } from '../lib/useAuth';
 import { SkataWordmark } from './SkataWordmark';
 import { SKATA_LOGO_BASE64 } from '../assets/logoBase64';
 import {
@@ -397,23 +398,74 @@ export function KeanggotaanPage({ onBack }: { onBack: () => void }) {
 
 /* 3. E-KTA PAGE (DASHBOARD-GRADE LIVE CARD GENERATOR) */
 export function EKtaPage({ onBack }: { onBack: () => void }) {
-  const [nama, setNama] = useState('NAMA ANGGOTA LENGKAP');
-  const [nik, setNik] = useState('24080193');
-  const [dpw, setDpw] = useState('DPW II - JAWA BARAT');
+  const { user } = useAuth();
+  const [nama, setNama] = useState('');
+  const [nik, setNik] = useState('');
+  const [dpw, setDpw] = useState('DPW II - DKI & BANTEN');
   const [showDemo, setShowDemo] = useState(false);
+  const [syncSource, setSyncSource] = useState<string>('Memuat data...');
+
+  const mapDpwStr = (val?: string): string => {
+    if (!val) return 'DPW II - DKI & BANTEN';
+    const v = val.toUpperCase();
+    if (v.includes('1') || v.includes('SUMATERA')) return 'DPW I - SUMATERA';
+    if (v.includes('2') || v.includes('DKI') || v.includes('BANTEN') || v.includes('JABODETABEK') || v.includes('JABAR')) return 'DPW II - DKI & BANTEN';
+    if (v.includes('3') || v.includes('JATENG') || v.includes('JATIM') || v.includes('BALI') || v.includes('NUSRA')) return 'DPW III - JAWA TIMUR & BALI';
+    if (v.includes('4') || v.includes('KALIMANTAN')) return 'DPW IV - KALIMANTAN';
+    if (v.includes('5') || v.includes('SULAWESI') || v.includes('TIMUR') || v.includes('PAPUA') || v.includes('MALUKU')) return 'DPW V - SULAWESI & TIMUR';
+    return 'DPW II - DKI & BANTEN';
+  };
+
+  useEffect(() => {
+    if (user && user.role !== 'guest') {
+      setNama(user.name.toUpperCase());
+      setNik(user.nik || '10002026');
+      setDpw(mapDpwStr(user.dpwRegion));
+      setSyncSource(`Akun Terhubung: ${user.name}`);
+    } else {
+      setNama('AMIRUDDIN AHMAD');
+      setNik('10002026');
+      setDpw('DPW II - DKI & BANTEN');
+      setSyncSource('Data Pengurus DPP SKATA');
+    }
+
+    // Subscribe to Firestore memberships to auto-match if user data is updated in Firestore
+    const unsub = subscribeMemberships((items) => {
+      if (items && items.length > 0 && user) {
+        const matched = items.find((m) =>
+          (user.email && m.email?.toLowerCase() === user.email.toLowerCase()) ||
+          (user.nik && m.nik === user.nik) ||
+          (user.name && m.namaLengkap?.toLowerCase() === user.name.toLowerCase())
+        );
+        if (matched) {
+          if (matched.namaLengkap) setNama(matched.namaLengkap.toUpperCase());
+          if (matched.nik) setNik(matched.nik);
+          if (matched.dpw) setDpw(mapDpwStr(matched.dpw));
+          setSyncSource(`Database Firestore Terverifikasi (${matched.namaLengkap})`);
+        }
+      }
+    });
+
+    return () => unsub();
+  }, [user]);
 
   return (
     <SubPageLayout
       title="e-KTA Digital"
-      description="Sistem penerbitan Kartu Tanda Anggota Elektronik. Masukkan data Anda di bawah ini untuk melihat pratinjau kartu anggota Anda secara instan."
+      description="Sistem penerbitan Kartu Tanda Anggota Elektronik. Data Anda telah disinkronkan secara real-time dengan database keanggotaan SKATA."
       icon={WalletCards}
       onBack={onBack}
     >
       <div className="ekta-grid">
         {/* Generator Controls */}
         <div className="ekta-controls">
-          <h3>Pratinjau e-KTA Interaktif</h3>
-          <p>Ubah input di bawah ini untuk mensimulasikan cetak e-KTA digital Anda secara real-time:</p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <h3 style={{ margin: 0 }}>Pratinjau e-KTA Interaktif</h3>
+            <span style={{ fontSize: '11px', backgroundColor: '#e0f2fe', color: '#0369a1', padding: '2px 8px', borderRadius: '12px', fontWeight: 600 }}>
+              ● {syncSource}
+            </span>
+          </div>
+          <p>Data kartu di bawah ini tersinkron secara otomatis dengan profil akun dan database Firestore Anda:</p>
           <div className="premium-form no-margin">
             <label>
               Nama Pemilik Kartu
@@ -426,11 +478,11 @@ export function EKtaPage({ onBack }: { onBack: () => void }) {
             <label>
               Wilayah DPW
               <select value={dpw} onChange={(e) => setDpw(e.target.value)}>
-                <option>DPW I - SUMATERA</option>
-                <option>DPW II - DKI & BANTEN</option>
-                <option>DPW III - JAWA TIMUR & BALI</option>
-                <option>DPW IV - KALIMANTAN</option>
-                <option>DPW V - SULAWESI & TIMUR</option>
+                <option value="DPW I - SUMATERA">DPW I - SUMATERA</option>
+                <option value="DPW II - DKI & BANTEN">DPW II - DKI & BANTEN</option>
+                <option value="DPW III - JAWA TIMUR & BALI">DPW III - JAWA TIMUR & BALI</option>
+                <option value="DPW IV - KALIMANTAN">DPW IV - KALIMANTAN</option>
+                <option value="DPW V - SULAWESI & TIMUR">DPW V - SULAWESI & TIMUR</option>
               </select>
             </label>
             <button className="button primary w-full" onClick={() => setShowDemo(true)}>
@@ -438,7 +490,7 @@ export function EKtaPage({ onBack }: { onBack: () => void }) {
             </button>
             {showDemo && (
               <p className="success-inline-message" style={{ color: 'green', fontSize: '12px', marginTop: '8px' }}>
-                ✓ File PDF berhasil diproses! Mulai download secara berkala...
+                ✓ File PDF e-KTA ({nama}) berhasil diproses!
               </p>
             )}
           </div>
