@@ -409,10 +409,10 @@ function StatCard({
     >
       <div className="stat-top" style={{ zIndex: 2, position: 'relative' }}>
         <span className="stat-icon"><Icon size={25} /></span>
-        <div>
+        <div className="stat-info">
           <small>{title}</small>
           {value !== undefined && <strong style={{ color: '#ffffff', ...strongStyle }}>{renderValue()}</strong>}
-          <span style={{ display: 'block', color: 'rgba(255,255,255,.68)', fontSize: '12px', marginTop: '2px', fontWeight: 500, lineHeight: 1.3 }}>
+          <span className="stat-subtitle">
             {subtitle}
           </span>
         </div>
