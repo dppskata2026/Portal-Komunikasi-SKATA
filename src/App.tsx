@@ -11,6 +11,7 @@ import {
   Landmark,
   Menu,
   Moon,
+  PenSquare,
   Search,
   Send,
   ShieldCheck,
@@ -651,16 +652,16 @@ function SorotanSKATA({ navigate }: { navigate: (path: string) => void }) {
           <button
             className="button primary"
             onClick={() => navigate('/berita')}
-            style={{ fontSize: '13.5px', padding: '8px 20px' }}
+            style={{ fontSize: '13.5px', padding: '8px 20px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
           >
-            ✍️ Tulis Berita Baru di Laman Berita
+            <PenSquare size={16} /> Tulis Berita Baru di Laman Berita
           </button>
         </div>
       ) : (
         <div className="sorotan-grid">
           {/* Left Featured Article */}
           {featured && (
-            <div className="sorotan-left">
+            <div className="sorotan-left" style={sideArticles.length === 0 ? { gridColumn: 'span 12', maxWidth: '880px', margin: '0 auto', width: '100%' } : undefined}>
               <div className="featured-img-shell">
                 <img
                   src={featured.image || '/assets/skata-hero-visual.png'}
@@ -697,61 +698,37 @@ function SorotanSKATA({ navigate }: { navigate: (path: string) => void }) {
           )}
 
           {/* Right Articles List */}
-          <div className="sorotan-right">
-            {sideArticles.map((item, index) => (
-              <a
-                key={item.id || index}
-                href={`/berita?id=${item.id}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate(`/berita?id=${item.id}`);
-                }}
-                className="editorial-small-card"
-              >
-                <div className="small-img-shell">
-                  <img
-                    src={item.image || '/assets/skata-hero-visual.png'}
-                    alt={item.title}
-                    loading="lazy"
-                    onError={(e) => { (e.target as HTMLImageElement).src = '/assets/skata-hero-visual.png'; }}
-                  />
-                </div>
-                <div className="small-content">
-                  <div className="small-meta">
-                    <span className="small-badge">{item.category || 'Berita'}</span>
-                    <time className="small-date">{item.date}</time>
+          {sideArticles.length > 0 && (
+            <div className="sorotan-right">
+              {sideArticles.map((item, index) => (
+                <a
+                  key={item.id || index}
+                  href={`/berita?id=${item.id}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate(`/berita?id=${item.id}`);
+                  }}
+                  className="editorial-small-card"
+                >
+                  <div className="small-img-shell">
+                    <img
+                      src={item.image || '/assets/skata-hero-visual.png'}
+                      alt={item.title}
+                      loading="lazy"
+                      onError={(e) => { (e.target as HTMLImageElement).src = '/assets/skata-hero-visual.png'; }}
+                    />
                   </div>
-                  <h4>{item.title}</h4>
-                </div>
-              </a>
-            ))}
-
-            {sideArticles.length === 0 && (
-              <div
-                onClick={() => navigate('/berita')}
-                style={{
-                  padding: '24px',
-                  borderRadius: '16px',
-                  border: '1px dashed rgba(255,255,255,0.15)',
-                  background: 'rgba(255,255,255,0.02)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  textAlign: 'center',
-                  cursor: 'pointer',
-                  color: 'rgba(255,255,255,0.7)',
-                  fontSize: '13px',
-                  height: '100%',
-                  minHeight: '140px'
-                }}
-              >
-                <div style={{ fontSize: '24px', marginBottom: '6px' }}>✍️</div>
-                <span style={{ fontWeight: 600, color: '#fff' }}>Tambah Berita Lainnya</span>
-                <span style={{ fontSize: '12px', marginTop: '4px', opacity: 0.8 }}>Klik untuk publikasi berita di Laman Berita</span>
-              </div>
-            )}
-          </div>
+                  <div className="small-content">
+                    <div className="small-meta">
+                      <span className="small-badge">{item.category || 'Berita'}</span>
+                      <time className="small-date">{item.date}</time>
+                    </div>
+                    <h4>{item.title}</h4>
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </section>
