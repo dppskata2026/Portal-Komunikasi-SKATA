@@ -480,7 +480,7 @@ function computeActiveMemberCount(firestoreItems: any[] = []): number {
     mappedFirestore = firestoreItems.map((f: any, index: number) => ({
       id: f.id || `FS-${index}`,
       nik: f.nik || `100020${26 + index}`,
-      fullName: f.fullName || 'Nama Tidak Tersedia',
+      fullName: f.fullName || f.name || f.nama || f.namaLengkap || 'Anggota SKATA',
       unit: f.unit || 'Unit Kerja Umum',
       workLocation: f.workLocation || f.dpc || f.dpw || 'Kantor Pusat / FM',
       status: f.status || 'Anggota Aktif',

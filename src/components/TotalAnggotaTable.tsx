@@ -44,8 +44,7 @@ const AnonymousAvatar: React.FC<{ size?: number; borderRadius?: string }> = ({ s
 
 export function deduplicateMembers(list: MemberRecord[]): MemberRecord[] {
   if (!Array.isArray(list)) return [];
-  const seenKeys = new Set<string>();
-  const result: MemberRecord[] = [];
+  const mapByKey = new Map<string, MemberRecord>();
 
   for (const m of list) {
     if (!m) continue;
@@ -55,19 +54,43 @@ export function deduplicateMembers(list: MemberRecord[]): MemberRecord[] {
     let key = '';
     if (cleanNik && cleanNik !== '-' && cleanNik !== '10002026') {
       key = `NIK:${cleanNik}`;
-    } else if (cleanName) {
+    } else if (cleanName && !cleanName.includes('tidak tersedia') && !cleanName.includes('anggota skata')) {
       key = `NAME:${cleanName}`;
     } else {
       key = `ID:${m.id || Math.random()}`;
     }
 
-    if (!seenKeys.has(key)) {
-      seenKeys.add(key);
-      result.push(m);
+    if (!mapByKey.has(key)) {
+      mapByKey.set(key, m);
+    } else {
+      const existing = mapByKey.get(key)!;
+      const existingName = (existing.fullName || '').toLowerCase();
+      const newName = (m.fullName || '').toLowerCase();
+
+      // If existing name is generic / unavailable but the new record has a real name, replace it
+      const existingIsGeneric = existingName.includes('tidak tersedia') || existingName.includes('anggota skata') || existingName.startsWith('anggota ');
+      const newIsGeneric = newName.includes('tidak tersedia') || newName.includes('anggota skata') || newName.startsWith('anggota ');
+
+      if (existingIsGeneric && !newIsGeneric) {
+        mapByKey.set(key, m);
+      } else if (!existingIsGeneric && !newIsGeneric && m.fullName && m.fullName.length > (existing.fullName || '').length) {
+        mapByKey.set(key, { ...existing, ...m });
+      } else {
+        // Merge extra properties if available
+        mapByKey.set(key, {
+          ...m,
+          ...existing,
+          fullName: existingIsGeneric && !newIsGeneric ? m.fullName : existing.fullName,
+          phone: existing.phone || m.phone,
+          corpEmail: existing.corpEmail || m.corpEmail,
+          unit: existing.unit !== '-' ? existing.unit : m.unit,
+          workLocation: existing.workLocation !== '-' ? existing.workLocation : m.workLocation
+        });
+      }
     }
   }
 
-  return result;
+  return Array.from(mapByKey.values());
 }
 
 export function getStandardDPW(m: { dpw?: string; workLocation?: string; unit?: string }): 'DPP' | 'DPW 1' | 'DPW 2' | 'DPW 3' | 'DPW 4' | 'DPW 5' {
@@ -156,7 +179,7 @@ export const TotalAnggotaTable: React.FC = () => {
           return {
             id: f.id || `FS-${index}`,
             nik: f.nik || `100020${26 + index}`,
-            fullName: f.fullName || 'Nama Tidak Tersedia',
+            fullName: f.fullName || f.name || f.nama || f.namaLengkap || 'Anggota SKATA',
             unit: f.unit || 'Unit Kerja Umum',
             workLocation: f.workLocation || f.dpc || f.dpw || 'Kantor Pusat / FM',
             status: f.status || 'Anggota Aktif',
@@ -351,10 +374,10 @@ export const TotalAnggotaTable: React.FC = () => {
             return '';
           };
 
-          const nik = getVal('NIK', 'NIK Karyawan', 'No. NIK', 'nik', 'no_nik', 'id') || `99${idx + 1000}`;
-          const fullName = getVal('Nama Karyawan', 'Nama', 'Nama Lengkap', 'fullName', 'nama_lengkap', 'karyawan') || `Anggota ${idx + 1}`;
-          const unit = getVal('Nama Unit', 'Unit', 'Unit Kerja', 'unit', 'divisi', 'departemen') || '-';
-          const workLocation = getVal('Kantor', 'Lokasi Kerja', 'Kantor / Lokasi Kerja', 'workLocation', 'lokasi', 'site') || '-';
+          const nik = getVal('NIK', 'NIK Karyawan', 'No. NIK', 'nik', 'no_nik', 'id', 'Nomor Induk', 'No NIK', 'No.NIK', 'Nip') || `99${idx + 1000}`;
+          const fullName = getVal('Nama Lengkap', 'Nama Karyawan', 'Nama', 'fullName', 'nama_lengkap', 'nama', 'karyawan', 'Full Name', 'Name') || `Anggota ${idx + 1}`;
+          const unit = getVal('Nama Unit', 'Unit', 'Unit Kerja', 'unit', 'divisi', 'departemen', 'Department') || '-';
+          const workLocation = getVal('Kantor', 'Lokasi Kerja', 'Kantor / Lokasi Kerja', 'workLocation', 'lokasi', 'site', 'Location') || '-';
           let dpw = getVal('Wilayah', 'Wilayah DPW', 'DPW', 'dpw', 'regional', 'daerah') || '-';
 
           // Auto detect DPW from workLocation or Unit if DPW column is missing
