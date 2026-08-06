@@ -52,7 +52,7 @@ import {
 
 import { organizationProfile } from './data/skataMasterData';
 import { DotMap } from './components/DotMap';
-import skataLogoOfficial from './assets/skata-logo-official.png';
+import { SKATA_LOGO_BASE64 } from './assets/logoBase64';
 
 type IconComponent = typeof User;
 
@@ -92,7 +92,7 @@ const navItems = [
 ];
 
 function OfficialSkataLogo({ className = '' }: { className?: string }) {
-  const [logoSrc, setLogoSrc] = useState(skataLogoOfficial);
+  const [logoSrc, setLogoSrc] = useState(SKATA_LOGO_BASE64);
 
   return (
     <img
@@ -100,11 +100,11 @@ function OfficialSkataLogo({ className = '' }: { className?: string }) {
       src={logoSrc}
       alt="Logo resmi SKATA — Serikat Karyawan GSD"
       onError={() => {
-        if (logoSrc === skataLogoOfficial) {
-          setLogoSrc('/assets/skata-logo-official.png');
-        } else if (logoSrc === '/assets/skata-logo-official.png') {
+        if (logoSrc === SKATA_LOGO_BASE64) {
           setLogoSrc('/skata-logo-official.png');
         } else if (logoSrc === '/skata-logo-official.png') {
+          setLogoSrc('/assets/skata-logo-official.png');
+        } else if (logoSrc === '/assets/skata-logo-official.png') {
           setLogoSrc('/logo.png');
         }
       }}

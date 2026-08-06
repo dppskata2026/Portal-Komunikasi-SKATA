@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { subscribeNewsArticles, addNewsArticleFirebase, deleteNewsArticleFirebase, safeSetLocalStorage } from '../lib/firestoreService';
 import { SkataWordmark } from './SkataWordmark';
-import skataLogoOfficial from '../assets/skata-logo-official.png';
+import { SKATA_LOGO_BASE64 } from '../assets/logoBase64';
 import {
   BookOpenText,
   UsersRound,
@@ -450,10 +450,10 @@ export function EKtaPage({ onBack }: { onBack: () => void }) {
             <div className="ekta-card-bg-glow" />
             <div className="ekta-card-header">
               <img
-                src={skataLogoOfficial}
+                src={SKATA_LOGO_BASE64}
                 className="ekta-card-logo"
                 alt="SKATA"
-                onError={(e) => { (e.target as HTMLImageElement).src = '/assets/skata-logo-official.png'; }}
+                onError={(e) => { (e.target as HTMLImageElement).src = '/skata-logo-official.png'; }}
               />
               <SkataWordmark size="sm" />
               <span className="ekta-badge-type">MEMBER</span>
@@ -1810,10 +1810,10 @@ export function LoginPage({ onBack }: { onBack: () => void }) {
           <form onSubmit={handleLoginSubmit} className="premium-form">
             <div style={{ textAlign: 'center', marginBottom: '24px' }}>
               <img
-                src={skataLogoOfficial}
+                src={SKATA_LOGO_BASE64}
                 style={{ width: '80px', height: 'auto', marginBottom: '12px' }}
                 alt="SKATA"
-                onError={(e) => { (e.target as HTMLImageElement).src = '/assets/skata-logo-official.png'; }}
+                onError={(e) => { (e.target as HTMLImageElement).src = '/skata-logo-official.png'; }}
               />
               <h2>Sistem Layanan Anggota</h2>
               <p style={{ fontSize: '13px', color: '#666' }}>Silakan login menggunakan NIK atau email terdaftar Anda.</p>
