@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { subscribeNewsArticles, subscribeMemberships, safeSetLocalStorage } from './lib/firestoreService';
+import { deduplicateMembers } from './components/TotalAnggotaTable';
 import {
   Bell,
   Bot,
@@ -474,20 +475,25 @@ function computeActiveMemberCount(firestoreItems: any[] = []): number {
     }
   } catch {}
 
+  let mappedFirestore: any[] = [];
   if (firestoreItems && firestoreItems.length > 0) {
-    const firestoreNikMap = new Map(firestoreItems.map((f: any) => [f.nik, f]));
-    const updatedLocal = localMembers.map((m: any) => {
-      if (firestoreNikMap.has(m.nik)) {
-        return { ...m, ...firestoreNikMap.get(m.nik) };
-      }
-      return m;
-    });
-    const existingNIKs = new Set(updatedLocal.map((m: any) => m.nik));
-    const newFromFirestore = firestoreItems.filter((f: any) => !existingNIKs.has(f.nik));
-    return updatedLocal.length + newFromFirestore.length;
+    mappedFirestore = firestoreItems.map((f: any, index: number) => ({
+      id: f.id || `FS-${index}`,
+      nik: f.nik || `100020${26 + index}`,
+      fullName: f.fullName || 'Nama Tidak Tersedia',
+      unit: f.unit || 'Unit Kerja Umum',
+      workLocation: f.workLocation || f.dpc || f.dpw || 'Kantor Pusat / FM',
+      status: f.status || 'Anggota Aktif',
+      dpw: f.dpw || (f.workLocation?.toUpperCase().includes('PUSAT') ? 'DPP' : 'DPW 1'),
+      position: f.position || '',
+      corpEmail: f.corpEmail || '',
+      phone: f.phone || ''
+    }));
   }
 
-  return localMembers.length;
+  const combined = [...mappedFirestore, ...localMembers];
+  const deduplicated = deduplicateMembers(combined);
+  return deduplicated.length;
 }
 
 function useActiveMemberCount() {
@@ -688,7 +694,7 @@ function SorotanSKATA({ navigate }: { navigate: (path: string) => void }) {
             <div className="sorotan-right">
               {sideArticles.map((item, index) => (
                 <a
-                  key={item.id || index}
+                  key={`side-art-${item.id || index}-${index}`}
                   href={`/berita?id=${item.id}`}
                   onClick={(e) => {
                     e.preventDefault();

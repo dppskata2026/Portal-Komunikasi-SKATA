@@ -3,7 +3,7 @@ import { dpwList } from '../data/skataMasterData';
 import { ArrowLeft, Users, Landmark, Search, ExternalLink, ShieldCheck, UserCheck, Database, Building2, UserX } from 'lucide-react';
 import { DotMapFull } from './DotMap';
 import { subscribeMemberships } from '../lib/firestoreService';
-import { MemberRecord } from './TotalAnggotaTable';
+import { MemberRecord, deduplicateMembers } from './TotalAnggotaTable';
 
 interface DPWPageProps {
   onBack: () => void;
@@ -54,7 +54,7 @@ export function DPWPage({ onBack, selectedId, navigate }: DPWPageProps) {
       const stored = localStorage.getItem('skata_total_active_members');
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed)) return deduplicateMembers(parsed);
       }
     } catch {
       // ignore
@@ -106,21 +106,8 @@ export function DPWPage({ onBack, selectedId, navigate }: DPWPageProps) {
             }
           }
 
-          if (currentLocal.length === 0) {
-            return mappedFirestore;
-          }
-
-          const firestoreNikMap = new Map(mappedFirestore.map(m => [m.nik, m]));
-          const updatedLocal = currentLocal.map(m => {
-            if (firestoreNikMap.has(m.nik)) {
-              return firestoreNikMap.get(m.nik)!;
-            }
-            return m;
-          });
-
-          const existingNIKs = new Set(updatedLocal.map(m => m.nik));
-          const brandNewFromFirestore = mappedFirestore.filter(d => !existingNIKs.has(d.nik));
-          return [...updatedLocal, ...brandNewFromFirestore];
+          const combined = [...mappedFirestore, ...currentLocal];
+          return deduplicateMembers(combined);
         });
       }
     });
@@ -356,7 +343,7 @@ export function DPWPage({ onBack, selectedId, navigate }: DPWPageProps) {
                 </thead>
                 <tbody>
                   {filteredDpwMembers.map((m, idx) => (
-                    <tr key={m.id || idx} style={{ borderBottom: '1px solid #f0f0f0', transition: 'background 0.15s' }}>
+                    <tr key={`dpw-m-${m.id || 'm'}-${m.nik || 'nik'}-${idx}`} style={{ borderBottom: '1px solid #f0f0f0', transition: 'background 0.15s' }}>
                       <td style={{ padding: '12px 16px', fontFamily: 'monospace', fontWeight: 600, color: '#333' }}>
                         {m.nik}
                       </td>

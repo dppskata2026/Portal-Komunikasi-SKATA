@@ -42,6 +42,34 @@ const AnonymousAvatar: React.FC<{ size?: number; borderRadius?: string }> = ({ s
   );
 };
 
+export function deduplicateMembers(list: MemberRecord[]): MemberRecord[] {
+  if (!Array.isArray(list)) return [];
+  const seenKeys = new Set<string>();
+  const result: MemberRecord[] = [];
+
+  for (const m of list) {
+    if (!m) continue;
+    const cleanNik = (m.nik || '').toString().trim().toLowerCase();
+    const cleanName = (m.fullName || '').toString().trim().toLowerCase().replace(/\s+/g, ' ');
+
+    let key = '';
+    if (cleanNik && cleanNik !== '-' && cleanNik !== '10002026') {
+      key = `NIK:${cleanNik}`;
+    } else if (cleanName) {
+      key = `NAME:${cleanName}`;
+    } else {
+      key = `ID:${m.id || Math.random()}`;
+    }
+
+    if (!seenKeys.has(key)) {
+      seenKeys.add(key);
+      result.push(m);
+    }
+  }
+
+  return result;
+}
+
 export function getStandardDPW(m: { dpw?: string; workLocation?: string; unit?: string }): 'DPP' | 'DPW 1' | 'DPW 2' | 'DPW 3' | 'DPW 4' | 'DPW 5' {
   const dpwStr = (m.dpw || '').toUpperCase();
   const locStr = (m.workLocation || '').toUpperCase();
@@ -89,7 +117,7 @@ export const TotalAnggotaTable: React.FC = () => {
       const stored = localStorage.getItem('skata_total_active_members');
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed)) return deduplicateMembers(parsed);
       }
     } catch {
       // ignore
@@ -155,23 +183,8 @@ export const TotalAnggotaTable: React.FC = () => {
             }
           }
 
-          if (currentLocal.length === 0) {
-            safeSetLocalStorage('skata_total_active_members', mappedFirestore);
-            return mappedFirestore;
-          }
-
-          // Merge Firestore items into local array by updating or appending
-          const firestoreNikMap = new Map(mappedFirestore.map(m => [m.nik, m]));
-          const updatedLocal = currentLocal.map(m => {
-            if (firestoreNikMap.has(m.nik)) {
-              return firestoreNikMap.get(m.nik)!;
-            }
-            return m;
-          });
-
-          const existingNIKs = new Set(updatedLocal.map(m => m.nik));
-          const brandNewFromFirestore = mappedFirestore.filter(d => !existingNIKs.has(d.nik));
-          const finalMerged = [...updatedLocal, ...brandNewFromFirestore];
+          const combined = [...mappedFirestore, ...currentLocal];
+          const finalMerged = deduplicateMembers(combined);
 
           safeSetLocalStorage('skata_total_active_members', finalMerged);
           return finalMerged;
@@ -371,16 +384,18 @@ export const TotalAnggotaTable: React.FC = () => {
           };
         });
 
-        setMembers(importedMembers);
-        safeSetLocalStorage('skata_total_active_members', importedMembers);
+        const deduplicatedImport = deduplicateMembers(importedMembers);
+
+        setMembers(deduplicatedImport);
+        safeSetLocalStorage('skata_total_active_members', deduplicatedImport);
         localStorage.setItem('skata_members_is_cleared', 'false');
         
         // Sync directly to Firebase Firestore & Supabase so changes reflect on Vercel and all devices!
-        saveBulkMembershipsFirebase(importedMembers).catch(console.error);
+        saveBulkMembershipsFirebase(deduplicatedImport).catch(console.error);
 
         window.dispatchEvent(new Event('skata_members_updated'));
         setShowUploadModal(false);
-        setSuccessMsg(`Berhasil mengunggah ${importedMembers.length} data anggota dari file Excel & tersinkronkan ke database online (Vercel & Firestore)!`);
+        setSuccessMsg(`Berhasil mengunggah ${deduplicatedImport.length} data anggota dari file Excel & tersinkronkan ke database online (Vercel & Firestore)!`);
         setTimeout(() => setSuccessMsg(null), 6000);
       } catch (err) {
         console.error('Error reading file:', err);
@@ -1111,7 +1126,7 @@ export const TotalAnggotaTable: React.FC = () => {
             }}>
               {filteredMembers.map((member, idx) => (
                 <div
-                  key={member.id || idx}
+                  key={`card-${member.id || 'm'}-${member.nik || 'nik'}-${idx}`}
                   onClick={() => setSelectedMemberDetail(member)}
                   style={{
                     background: '#ffffff',
@@ -1307,7 +1322,7 @@ export const TotalAnggotaTable: React.FC = () => {
                     const isBoard = member.status.toLowerCase().includes('pengurus') || member.status.toLowerCase().includes('pembina');
                     return (
                       <tr
-                        key={member.id || idx}
+                        key={`row-${member.id || 'm'}-${member.nik || 'nik'}-${idx}`}
                         onClick={() => setSelectedMemberDetail(member)}
                         style={{
                           borderBottom: '1px solid #f1f5f9',
