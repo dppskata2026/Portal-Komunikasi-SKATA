@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
+import { getRelevantContextForPrompt, generateSkataSearchResponse } from './src/lib/skataKnowledgeSearch';
 
 async function startServer() {
   const app = express();
@@ -19,11 +20,22 @@ async function startServer() {
     try {
       const { messages, prompt } = req.body;
 
+      // Extract last user message to perform knowledge search
+      let lastQuery = prompt || '';
+      if (Array.isArray(messages) && messages.length > 0) {
+        const lastUserMsg = [...messages].reverse().find((m: any) => m.role === 'user');
+        if (lastUserMsg) {
+          lastQuery = lastUserMsg.content || lastUserMsg.text || lastQuery;
+        }
+      }
+
+      const searchedContext = lastQuery ? getRelevantContextForPrompt(lastQuery) : '';
+
       const apiKey = process.env.GEMINI_API_KEY;
       if (!apiKey) {
-        return res.status(500).json({
-          error: 'GEMINI_API_KEY belum dikonfigurasi di server. Silakan tambahkan API key pada file .env atau menu Settings > Secrets.',
-        });
+        // Fallback to local knowledge search response if no API key configured
+        const fallbackReply = generateSkataSearchResponse(lastQuery || 'haloo');
+        return res.json({ reply: fallbackReply });
       }
 
       const ai = new GoogleGenAI({
@@ -35,7 +47,7 @@ async function startServer() {
         },
       });
 
-      const systemInstruction = `Kamu adalah Sahabat SKATA, Asisten AI Cerdas resmi Serikat Karyawan GSD (PT Graha Sarana Duta / TelkomProperty - Anak Perusahaan PT Telkom Indonesia Tbk).
+      let systemInstruction = `Kamu adalah Sahabat SKATA, Asisten AI Cerdas resmi Serikat Karyawan GSD (PT Graha Sarana Duta / TelkomProperty - Anak Perusahaan PT Telkom Indonesia Tbk).
 
 Tujuan Utama:
 Jawablah setiap pertanyaan anggota, pengurus, atau karyawan dengan sangat ramah, komunikatif, profesional, akurat, dan solutif. Jawabanmu harus selalu menyambung secara langsung dengan konteks pertanyaan user dan memberikan informasi yang benar berdasarkan Database Regulasi Resmi SKATA & PT GSD.
@@ -100,9 +112,11 @@ DATABASE REGULASI & INFORMASI RESMI SKATA:
    - DPW 2 (Jakarta, Banten, Jabar): Ketua Asep Saipul Bahry (dpw2@skata-gsd.or.id)
    - DPW 3 (Jateng, Jatim, Bali, Nusra): Ketua Angga Eka Saputra (dpw3@skata-gsd.or.id)
    - DPW 4 (Kalimantan): Ketua Moh. Abdulloh Hadi (dpw4@skata-gsd.or.id)
-   - DPW 5 (Kawasan Timur Indonesia/Sulawesi/Papua/Maluku): Ketua Muhammad Afdhal Syahrullah (dpw5@skata-gsd.or.id)
+   - DPW 5 (Kawasan Timur Indonesia/Sulawesi/Papua/Maluku): Ketua Muhammad Afdhal Syahrullah (dpw5@skata-gsd.or.id)`;
 
-Apabila pengguna menanyakan hal di luar cakupan regulasi di atas (misal pertanyaan umum atau greeting), jawablah dengan hangat, tetap profesional, dan sambungkan jawabanmu dengan peranmu sebagai Sahabat SKATA yang siap membantu!`;
+      if (searchedContext) {
+        systemInstruction += `\n\n${searchedContext}`;
+      }
 
       // Format conversation history for Gemini Chat to guarantee valid user/model turns starting with 'user'
       let formattedContents: Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }> = [];
@@ -143,25 +157,40 @@ Apabila pengguna menanyakan hal di luar cakupan regulasi di atas (misal pertanya
         return res.status(400).json({ error: 'Format pesan tidak valid.' });
       }
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.6-flash',
-        contents: formattedContents,
-        config: {
-          systemInstruction,
-          temperature: 0.7,
-        },
-      });
+      const candidateModels = ['gemini-2.5-flash', 'gemini-3.6-flash', 'gemini-2.5-pro'];
+      let replyText = '';
 
-      const replyText = response.text || 'Maaf, Sahabat SKATA belum dapat memberikan jawaban saat ini. Silakan coba beberapa saat lagi.';
+      for (const modelName of candidateModels) {
+        try {
+          const response = await ai.models.generateContent({
+            model: modelName,
+            contents: formattedContents,
+            config: {
+              systemInstruction,
+              temperature: 0.7,
+            },
+          });
+          if (response.text) {
+            replyText = response.text;
+            break;
+          }
+        } catch (mErr) {
+          console.warn(`Model ${modelName} returned error, trying candidate model:`, mErr);
+        }
+      }
+
+      if (!replyText) {
+        replyText = generateSkataSearchResponse(lastQuery);
+      }
 
       return res.json({
         reply: replyText,
       });
     } catch (err: any) {
       console.error('Error in Sahabat SKATA Chat Endpoint:', err);
-      return res.status(500).json({
-        error: err?.message || 'Terjadi kesalahan saat menghubungkan ke layanan Sahabat SKATA AI.',
-      });
+      // Fallback gracefully to smart search response
+      const fallbackReply = generateSkataSearchResponse(req.body?.prompt || 'haloo');
+      return res.json({ reply: fallbackReply });
     }
   });
 
