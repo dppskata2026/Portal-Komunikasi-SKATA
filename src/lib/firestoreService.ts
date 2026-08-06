@@ -189,6 +189,63 @@ export async function saveMembershipSubmissionFirebase(data: any): Promise<boole
   }
 }
 
+export async function saveBulkMembershipsFirebase(records: any[]): Promise<boolean> {
+  try {
+    if (supabase) {
+      try {
+        const rows = records.map(r => ({
+          id: r.id || r.nik,
+          nik: r.nik,
+          full_name: r.fullName,
+          unit: r.unit,
+          work_location: r.workLocation,
+          dpw: r.dpw,
+          phone: r.phone || '',
+          corp_email: r.corpEmail || '',
+          status: r.status || 'Aktif',
+          updated_at: new Date().toISOString()
+        }));
+        await supabase.from('memberships').upsert(rows);
+      } catch (sErr) {
+        console.warn('Supabase bulk memberships sync warning:', sErr);
+      }
+    }
+
+    for (const r of records) {
+      const docId = (r.nik || r.id || `MEMBER_${Math.random()}`).toString().replace(/[^a-zA-Z0-9_-]/g, '_');
+      const docRef = doc(db, MEMBERSHIPS_COLLECTION, docId);
+      await setDoc(docRef, {
+        nik: r.nik,
+        fullName: r.fullName,
+        unit: r.unit,
+        workLocation: r.workLocation,
+        dpw: r.dpw,
+        phone: r.phone || '',
+        corpEmail: r.corpEmail || '',
+        status: r.status || 'Aktif',
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+    }
+    return true;
+  } catch (err) {
+    console.error('Error saving bulk memberships to Firestore:', err);
+    return false;
+  }
+}
+
+export async function clearMembershipsFirebase(): Promise<boolean> {
+  try {
+    const q = query(collection(db, MEMBERSHIPS_COLLECTION));
+    const snapshot = await getDocs(q);
+    const deletePromises = snapshot.docs.map(d => deleteDoc(d.ref));
+    await Promise.all(deletePromises);
+    return true;
+  } catch (err) {
+    console.error('Error clearing memberships in Firestore:', err);
+    return false;
+  }
+}
+
 // ---------------- DPP MEMBER PHOTOS (SYNCED TO FIREBASE) ----------------
 export function subscribeDppPhotos(callback: (photos: Record<string, string>) => void) {
   try {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Users, Search, Download, ShieldCheck, Building2, MapPin, Filter, CheckCircle2, RefreshCw, UserCheck, Upload, X, FileSpreadsheet, ChevronRight, Briefcase, Phone, Mail, LayoutGrid, List, BarChart2, Calendar } from 'lucide-react';
 import * as XLSX from 'xlsx';
-import { subscribeMemberships, safeSetLocalStorage } from '../lib/firestoreService';
+import { subscribeMemberships, safeSetLocalStorage, saveBulkMembershipsFirebase, clearMembershipsFirebase } from '../lib/firestoreService';
 import { OFFICIAL_ACTIVE_MEMBERS } from '../data/activeMembersData';
 
 export interface MemberRecord {
@@ -345,9 +345,13 @@ export const TotalAnggotaTable: React.FC = () => {
         setMembers(importedMembers);
         safeSetLocalStorage('skata_total_active_members', importedMembers);
         localStorage.setItem('skata_members_is_cleared', 'false');
+        
+        // Sync directly to Firebase Firestore & Supabase so changes reflect on Vercel and all devices!
+        saveBulkMembershipsFirebase(importedMembers).catch(console.error);
+
         window.dispatchEvent(new Event('skata_members_updated'));
         setShowUploadModal(false);
-        setSuccessMsg(`Berhasil mengunggah ${importedMembers.length} data anggota dari file Excel!`);
+        setSuccessMsg(`Berhasil mengunggah ${importedMembers.length} data anggota dari file Excel & tersinkronkan ke database online (Vercel & Firestore)!`);
         setTimeout(() => setSuccessMsg(null), 6000);
       } catch (err) {
         console.error('Error reading file:', err);
@@ -359,13 +363,14 @@ export const TotalAnggotaTable: React.FC = () => {
   };
 
   // Reset / Kosongkan Data Anggota
-  const handleResetData = () => {
+  const handleResetData = async () => {
     if (window.confirm('Apakah Anda yakin ingin menghapus / mengosongkan semua data anggota?')) {
       setMembers([]);
       safeSetLocalStorage('skata_total_active_members', []);
       localStorage.setItem('skata_members_is_cleared', 'true');
+      await clearMembershipsFirebase();
       window.dispatchEvent(new Event('skata_members_updated'));
-      setSuccessMsg('Semua data anggota telah berhasil dikosongkan (belum diupdate).');
+      setSuccessMsg('Semua data anggota telah berhasil dikosongkan dari database.');
       setTimeout(() => setSuccessMsg(null), 5000);
     }
   };
