@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Users, Search, Download, ShieldCheck, Building2, MapPin, Filter, CheckCircle2, RefreshCw, UserCheck, Upload, X, FileSpreadsheet, ChevronRight, Briefcase, Phone, Mail, LayoutGrid, List, BarChart2, Calendar } from 'lucide-react';
+import { Users, Search, Download, ShieldCheck, Building2, MapPin, Filter, CheckCircle2, RefreshCw, UserCheck, Upload, X, FileSpreadsheet, ChevronRight, Briefcase, Phone, Mail, LayoutGrid, List, BarChart2, Calendar, Lock, Shield, Sparkles } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { subscribeMemberships, safeSetLocalStorage, saveBulkMembershipsFirebase, clearMembershipsFirebase } from '../lib/firestoreService';
 import { OFFICIAL_ACTIVE_MEMBERS } from '../data/activeMembersData';
+import { useAuth } from '../lib/useAuth';
+import { ROLE_LABELS } from '../lib/authService';
 
 export interface MemberRecord {
   id: string;
@@ -41,6 +43,7 @@ const AnonymousAvatar: React.FC<{ size?: number; borderRadius?: string }> = ({ s
 };
 
 export const TotalAnggotaTable: React.FC = () => {
+  const { user, isGuest, isSuperAdmin, isDpp, isDpw } = useAuth();
   const [members, setMembers] = useState<MemberRecord[]>(() => {
     try {
       const stored = localStorage.getItem('skata_total_active_members');
@@ -377,6 +380,67 @@ export const TotalAnggotaTable: React.FC = () => {
 
   return (
     <div style={{ display: 'grid', gap: '24px' }}>
+      {/* Active Role Authorization Indicator Banner */}
+      <div style={{
+        background: ROLE_LABELS[user.role].bg,
+        border: `1.5px solid ${ROLE_LABELS[user.role].color}40`,
+        borderRadius: '14px',
+        padding: '16px 20px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '12px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{
+            padding: '8px',
+            borderRadius: '10px',
+            background: ROLE_LABELS[user.role].color,
+            color: '#fff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <ShieldCheck size={20} />
+          </div>
+          <div>
+            <div style={{ fontSize: '12px', fontWeight: 800, color: ROLE_LABELS[user.role].color, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Mode Akses & Otorisasi: {ROLE_LABELS[user.role].label}
+            </div>
+            <div style={{ fontSize: '13.5px', color: '#1f2937', fontWeight: 600, marginTop: '2px' }}>
+              {isGuest && 'Sesi Guest (Tamu): Mode baca data keanggotaan publik. Login sebagai Pengurus untuk akses pengelolaan.'}
+              {isDpw && `Sesi Pengurus ${user.dpwRegion || 'DPW'}: Akses verifikasi data anggota regional & publikasi berita.`}
+              {isDpp && 'Sesi Pengurus DPP (Pusat): Pengelolaan penuh seluruh anggota nasional, ekspor laporan & dokumen.'}
+              {isSuperAdmin && 'Sesi Super Admin Master: Hak akses penuh seluruh modul portal, kelola akun & reset database.'}
+            </div>
+          </div>
+        </div>
+
+        <a
+          href="/login"
+          onClick={(e) => {
+            e.preventDefault();
+            window.location.href = '/login';
+          }}
+          style={{
+            fontSize: '12.5px',
+            fontWeight: 800,
+            color: ROLE_LABELS[user.role].color,
+            background: '#ffffff',
+            border: `1px solid ${ROLE_LABELS[user.role].color}60`,
+            padding: '6px 14px',
+            borderRadius: '8px',
+            textDecoration: 'none',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+        >
+          {isGuest ? '🔑 Login Pengurus' : '🔄 Ganti / Atur Peran'}
+        </a>
+      </div>
+
       {/* Top Banner Alert if any success message */}
       {successMsg && (
         <div style={{
@@ -768,26 +832,53 @@ export const TotalAnggotaTable: React.FC = () => {
               </button>
             </div>
 
-            <button
-              onClick={() => setShowUploadModal(true)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                backgroundColor: '#0284c7',
-                color: '#ffffff',
-                border: 'none',
-                padding: '10px 16px',
-                borderRadius: '8px',
-                fontSize: '13px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                boxShadow: '0 2px 8px rgba(2, 132, 199, 0.25)',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              <Upload size={16} /> Upload Data Excel
-            </button>
+            {/* Upload Button for Pengurus & SuperAdmin */}
+            {!isGuest && (
+              <button
+                onClick={() => setShowUploadModal(true)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  backgroundColor: '#0284c7',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '10px 16px',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 8px rgba(2, 132, 199, 0.25)',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <Upload size={16} /> Upload Data Excel
+              </button>
+            )}
+
+            {/* Reset Database Button for SuperAdmin */}
+            {isSuperAdmin && (
+              <button
+                onClick={handleResetData}
+                title="Khusus Super Admin: Kosongkan seluruh database anggota"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  backgroundColor: '#fff',
+                  color: '#dc2626',
+                  border: '1px solid #fca5a5',
+                  padding: '10px 14px',
+                  borderRadius: '8px',
+                  fontSize: '12.5px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <RefreshCw size={15} /> Reset Database
+              </button>
+            )}
 
             <button
               onClick={handleExportExcel}

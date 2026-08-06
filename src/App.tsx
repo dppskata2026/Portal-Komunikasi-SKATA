@@ -25,6 +25,8 @@ import {
 
 import { Breadcrumbs } from './components/Breadcrumbs';
 import { SkataWordmark } from './components/SkataWordmark';
+import { useAuth } from './lib/useAuth';
+import { ROLE_LABELS, PRESET_ACCOUNTS, setActiveSession, logoutUser, UserSession } from './lib/authService';
 import { ProfilSKATA } from './components/ProfilSKATA';
 import { VisiMisi } from './components/VisiMisi';
 import { StrukturOrganisasi } from './components/StrukturOrganisasi';
@@ -151,6 +153,7 @@ function Navbar({
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const { user, isLoggedIn } = useAuth();
 
   useEffect(() => {
     document.documentElement.dataset.theme = darkMode ? 'dark' : 'light';
@@ -231,10 +234,10 @@ function Navbar({
         </div>
 
         <div className="nav-actions">
-          <button className="icon-button" aria-label="Cari">
+          <button className="icon-button" aria-label="Cari" onClick={() => navigate('/layanan/total-anggota')}>
             <Search size={21} />
           </button>
-          <button className="icon-button notification" aria-label="Notifikasi">
+          <button className="icon-button notification" aria-label="Notifikasi" onClick={() => navigate('/berita')}>
             <Bell size={21} />
             <span>3</span>
           </button>
@@ -247,10 +250,43 @@ function Navbar({
             <Moon size={16} />
             <span className="theme-knob">{darkMode ? <Moon size={14} /> : <Sun size={14} />}</span>
           </button>
-          <button className="login-button" onClick={onLogin}>
-            <User size={19} />
-            Login Anggota
-          </button>
+
+          {isLoggedIn ? (
+            <button
+              className="login-button"
+              onClick={() => navigate('/login')}
+              title={`Akses: ${ROLE_LABELS[user.role].label} - ${user.name}`}
+              style={{
+                background: ROLE_LABELS[user.role].bg,
+                color: ROLE_LABELS[user.role].color,
+                border: `1.5px solid ${ROLE_LABELS[user.role].color}60`,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '0 14px',
+                fontWeight: 800,
+                fontSize: '13px',
+                borderRadius: '10px'
+              }}
+            >
+              <ShieldCheck size={16} />
+              <span>
+                {user.role === 'superadmin'
+                  ? 'Super Admin'
+                  : user.role === 'dpp'
+                  ? 'DPP'
+                  : user.dpwRegion
+                  ? user.dpwRegion.split(' ')[0] + ' ' + (user.dpwRegion.split(' ')[1] || '')
+                  : 'Anggota'}
+              </span>
+            </button>
+          ) : (
+            <button className="login-button" onClick={() => navigate('/login')}>
+              <User size={18} />
+              Login / Otorisasi
+            </button>
+          )}
+
           <button
             className="mobile-menu-button"
             aria-label="Buka menu"
