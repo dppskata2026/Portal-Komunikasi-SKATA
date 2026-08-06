@@ -76,7 +76,7 @@ const navItems = [
     dropdown: [
       { label: 'Sahabat SKATA AI', href: '/layanan/sahabat-skata' },
       { label: 'Total Anggota Aktif', href: '/layanan/total-anggota' },
-      { label: 'Keanggotaan & Daftar', href: '/layanan/keanggotaan' },
+      { label: 'Pendaftaran Anggota Baru', href: '/layanan/keanggotaan' },
       { label: 'e-KTA Digital', href: '/layanan/e-kta' },
       { label: 'Keuangan & Iuran', href: '/layanan/keuangan' },
       { label: 'Program Kerja 2026–2028', href: '/layanan/program-kerja' },
@@ -423,99 +423,45 @@ function StatCard({
   );
 }
 
-function useActiveMemberCount() {
-  const [count, setCount] = useState<number | null>(() => {
-    try {
-      const stored = localStorage.getItem('skata_total_active_members');
-      let membersCount = 0;
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) membersCount = parsed.length;
+function computeActiveMemberCount(firestoreItems: any[] = []): number {
+  const isCleared = localStorage.getItem('skata_members_is_cleared') === 'true';
+  if (isCleared) return 0;
+
+  let localMembers: any[] = [];
+  try {
+    const stored = localStorage.getItem('skata_total_active_members');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        localMembers = parsed;
       }
-      const submissions = localStorage.getItem('skata_membership_submissions');
-      let subCount = 0;
-      if (submissions) {
-        const parsedSub = JSON.parse(submissions);
-        if (Array.isArray(parsedSub)) subCount = parsedSub.length;
-      }
-      const isCleared = localStorage.getItem('skata_members_is_cleared') === 'true';
-      if (isCleared && membersCount === 0) return 0;
-      return Math.max(membersCount, subCount);
-    } catch {
-      return 0;
     }
-  });
+  } catch {}
+
+  if (firestoreItems && firestoreItems.length > 0) {
+    if (localMembers.length === 0) {
+      return firestoreItems.length;
+    }
+    const existingNIKs = new Set(localMembers.map((m: any) => m.nik));
+    const newFromFirestore = firestoreItems.filter((f: any) => !existingNIKs.has(f.nik));
+    return localMembers.length + newFromFirestore.length;
+  }
+
+  return localMembers.length;
+}
+
+function useActiveMemberCount() {
+  const [count, setCount] = useState<number | null>(() => computeActiveMemberCount());
 
   useEffect(() => {
     const syncCount = () => {
-      try {
-        const isCleared = localStorage.getItem('skata_members_is_cleared') === 'true';
-        const stored = localStorage.getItem('skata_total_active_members');
-        let memberList: any[] = [];
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed)) memberList = parsed;
-        }
-
-        const subStored = localStorage.getItem('skata_membership_submissions');
-        let subList: any[] = [];
-        if (subStored) {
-          const parsedSub = JSON.parse(subStored);
-          if (Array.isArray(parsedSub)) subList = parsedSub;
-        }
-
-        if (isCleared && memberList.length === 0) {
-          setCount(0);
-          return;
-        }
-
-        const uniqueNiks = new Set([
-          ...memberList.map((m: any) => m.nik || m.id),
-          ...subList.map((s: any) => s.nik || s.id),
-        ].filter(Boolean));
-
-        const total = Math.max(memberList.length, uniqueNiks.size);
-        setCount(total);
-      } catch (err) {
-        console.warn('Error reading active members count:', err);
-      }
+      setCount(computeActiveMemberCount());
     };
 
     syncCount();
 
     const unsubscribe = subscribeMemberships((firestoreItems) => {
-      try {
-        const isCleared = localStorage.getItem('skata_members_is_cleared') === 'true';
-        if (isCleared) {
-          setCount(0);
-          return;
-        }
-
-        const stored = localStorage.getItem('skata_total_active_members');
-        let localMembers: any[] = [];
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed)) localMembers = parsed;
-        }
-
-        const subStored = localStorage.getItem('skata_membership_submissions');
-        let localSubs: any[] = [];
-        if (subStored) {
-          const parsedSub = JSON.parse(subStored);
-          if (Array.isArray(parsedSub)) localSubs = parsedSub;
-        }
-
-        const allNiks = new Set([
-          ...firestoreItems.map((f: any) => f.nik || f.id),
-          ...localMembers.map((m: any) => m.nik || m.id),
-          ...localSubs.map((s: any) => s.nik || s.id),
-        ].filter(Boolean));
-
-        const total = Math.max(localMembers.length, firestoreItems.length, allNiks.size);
-        setCount(total);
-      } catch {
-        setCount(firestoreItems.length);
-      }
+      setCount(computeActiveMemberCount(firestoreItems));
     });
 
     window.addEventListener('storage', syncCount);
