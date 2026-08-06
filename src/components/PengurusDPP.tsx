@@ -1,7 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { dppBoard, dewanPembina, organizationProfile } from '../data/skataMasterData';
-import { ArrowLeft, Users, Shield, Award, X, CheckCircle2, Briefcase, Building2, MapPin, Phone, Mail, ShieldCheck, UserCheck, Lock } from 'lucide-react';
-import { safeSetLocalStorage } from '../lib/firestoreService';
+import { ArrowLeft, Users, Shield, Award, X, CheckCircle2, Briefcase, Building2, MapPin, Phone, Mail, ShieldCheck, UserCheck, Lock, Camera, Upload, RotateCcw } from 'lucide-react';
+import { safeSetLocalStorage, subscribeDppPhotos, saveDppPhotoFirebase } from '../lib/firestoreService';
+
+export const DEFAULT_DPP_PHOTOS: Record<string, string> = {
+  "Amiruddin Ahmad": "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=400&q=80",
+  "Wira Widytara": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
+  "RM. Advitor Juto Kusmono": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
+  "Sultan Riady": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80",
+  "I Gede Aditya W": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=400&q=80",
+  "Heri Santoso": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80",
+  "Ronald Ishack": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+  "Jerry Pratama Yendy": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=400&q=80",
+  "Rifky Fernanda": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80",
+  "Muji Rahmad": "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=400&q=80",
+  "Iskandar Zulkarnain": "https://images.unsplash.com/photo-1521119989659-a83eee488004?auto=format&fit=crop&w=400&q=80",
+  "Gremmy Jordan": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=400&q=80",
+  "Andri": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=400&q=80",
+  "Nuronia Zulva": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80",
+  "Wisnu Yogi Prabowo": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
+  "Alya Adianta": "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=400&q=80"
+};
 
 interface PengurusDPPProps {
   onBack: () => void;
@@ -23,8 +42,8 @@ interface SelectedMemberProfile {
 }
 
 export function PengurusDPP({ onBack }: PengurusDPPProps) {
-  // Photos stored by member name with triple-lock backup protection to prevent re-seeding resets
-  const [photos] = useState<Record<string, string>>(() => {
+  // Photos stored by member name merged with default photo mapping for 100% availability
+  const [photos, setPhotos] = useState<Record<string, string>>(() => {
     try {
       const stored = localStorage.getItem('skata_dpp_member_photos');
       const locked = localStorage.getItem('skata_dpp_member_photos_locked');
@@ -32,20 +51,76 @@ export function PengurusDPP({ onBack }: PengurusDPPProps) {
       const primary = stored ? JSON.parse(stored) : {};
       const backup = locked ? JSON.parse(locked) : {};
       const seed = seedLocked ? JSON.parse(seedLocked) : {};
-      return { ...seed, ...backup, ...primary };
+      return { ...DEFAULT_DPP_PHOTOS, ...seed, ...backup, ...primary };
     } catch {
-      return {};
+      return DEFAULT_DPP_PHOTOS;
     }
   });
 
+  // Subscribe to real-time Firestore photos and sync with local cache
+  useEffect(() => {
+    const unsubscribe = subscribeDppPhotos((cloudPhotos) => {
+      if (cloudPhotos && Object.keys(cloudPhotos).length > 0) {
+        setPhotos((prev) => {
+          const merged = { ...DEFAULT_DPP_PHOTOS, ...prev, ...cloudPhotos };
+          safeSetLocalStorage('skata_dpp_member_photos', merged);
+          safeSetLocalStorage('skata_dpp_member_photos_locked', merged);
+          safeSetLocalStorage('skata_dpp_photos_permanent', merged);
+          return merged;
+        });
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
   // Ensure current photos state is locked across all storage backups on mount
-  React.useEffect(() => {
+  useEffect(() => {
     if (Object.keys(photos).length > 0) {
       safeSetLocalStorage('skata_dpp_member_photos', photos);
       safeSetLocalStorage('skata_dpp_member_photos_locked', photos);
       safeSetLocalStorage('skata_dpp_photos_permanent', photos);
     }
   }, [photos]);
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>, name: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const base64 = event.target?.result as string;
+      if (base64) {
+        const updated = { ...photos, [name]: base64 };
+        setPhotos(updated);
+        safeSetLocalStorage('skata_dpp_member_photos', updated);
+        safeSetLocalStorage('skata_dpp_member_photos_locked', updated);
+        safeSetLocalStorage('skata_dpp_photos_permanent', updated);
+        // Persist to Firebase Firestore for cross-device & permanent storage
+        await saveDppPhotoFirebase(name, base64);
+        if (selectedProfile && selectedProfile.name === name) {
+          setSelectedProfile({ ...selectedProfile, photoUrl: base64 });
+        }
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleResetPhoto = async (name: string) => {
+    const updated = { ...photos };
+    const defaultPhoto = DEFAULT_DPP_PHOTOS[name] || '';
+    if (defaultPhoto) {
+      updated[name] = defaultPhoto;
+    } else {
+      delete updated[name];
+    }
+    setPhotos(updated);
+    safeSetLocalStorage('skata_dpp_member_photos', updated);
+    safeSetLocalStorage('skata_dpp_member_photos_locked', updated);
+    safeSetLocalStorage('skata_dpp_photos_permanent', updated);
+    await saveDppPhotoFirebase(name, defaultPhoto);
+    if (selectedProfile && selectedProfile.name === name) {
+      setSelectedProfile({ ...selectedProfile, photoUrl: defaultPhoto });
+    }
+  };
 
   // Currently selected member for detail profile modal
   const [selectedProfile, setSelectedProfile] = useState<SelectedMemberProfile | null>(null);
@@ -471,6 +546,34 @@ export function PengurusDPP({ onBack }: PengurusDPPProps) {
               }}>
                 <div style={{ position: 'relative', marginBottom: '14px' }}>
                   <RenderAvatar name={selectedProfile.name} size={90} isClickable={false} />
+                  <label
+                    htmlFor={`modal-upload-photo-${selectedProfile.name}`}
+                    style={{
+                      position: 'absolute',
+                      bottom: '0',
+                      right: '0',
+                      background: '#ef4444',
+                      color: '#ffffff',
+                      borderRadius: '50%',
+                      width: '32px',
+                      height: '32px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.25)'
+                    }}
+                    title="Upload / Ganti Foto"
+                  >
+                    <Camera size={16} />
+                  </label>
+                  <input
+                    type="file"
+                    id={`modal-upload-photo-${selectedProfile.name}`}
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={(e) => handlePhotoUpload(e, selectedProfile.name)}
+                  />
                 </div>
 
                 <h2 style={{ margin: 0, fontSize: '22px', fontWeight: 800, color: '#0f172a' }}>
@@ -481,6 +584,51 @@ export function PengurusDPP({ onBack }: PengurusDPPProps) {
                 </div>
                 <div style={{ fontSize: '13px', fontFamily: 'monospace', fontWeight: 700, color: '#0284c7', marginTop: '4px' }}>
                   NIK: {selectedProfile.nik}
+                </div>
+
+                <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                  <label
+                    htmlFor={`btn-upload-${selectedProfile.name}`}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      color: '#0284c7',
+                      background: '#e0f2fe',
+                      padding: '6px 12px',
+                      borderRadius: '8px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <Upload size={14} /> Ganti Foto Fungsionaris
+                  </label>
+                  <input
+                    type="file"
+                    id={`btn-upload-${selectedProfile.name}`}
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={(e) => handlePhotoUpload(e, selectedProfile.name)}
+                  />
+                  <button
+                    onClick={() => handleResetPhoto(selectedProfile.name)}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      color: '#64748b',
+                      background: '#f1f5f9',
+                      border: 'none',
+                      padding: '6px 12px',
+                      borderRadius: '8px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <RotateCcw size={14} /> Reset Foto
+                  </button>
                 </div>
               </div>
 

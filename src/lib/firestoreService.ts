@@ -9,6 +9,7 @@ import {
   query
 } from 'firebase/firestore';
 import { db } from './firebase';
+import { supabase } from './supabase';
 import { SKATA_REGULATIONS_DATABASE, SkataRegulationDoc } from '../data/skataRegulationsDatabase';
 
 // Collection Names
@@ -16,6 +17,7 @@ export const NEWS_COLLECTION = 'news_articles';
 export const ASPIRATIONS_COLLECTION = 'aspirations';
 export const MEMBERSHIPS_COLLECTION = 'memberships';
 export const REGULATIONS_COLLECTION = 'skata_regulations';
+export const DPP_PHOTOS_COLLECTION = 'dpp_photos';
 
 // Interfaces
 export interface NewsArticle {
@@ -187,7 +189,63 @@ export async function saveMembershipSubmissionFirebase(data: any): Promise<boole
   }
 }
 
-// ---------------- SKATA REGULATIONS (AD, ART, PKB V) ----------------
+// ---------------- DPP MEMBER PHOTOS (SYNCED TO FIREBASE) ----------------
+export function subscribeDppPhotos(callback: (photos: Record<string, string>) => void) {
+  try {
+    const q = query(collection(db, DPP_PHOTOS_COLLECTION));
+    return onSnapshot(
+      q,
+      (snapshot) => {
+        const photos: Record<string, string> = {};
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          if (data && data.name && data.photoUrl) {
+            photos[data.name] = data.photoUrl;
+          }
+        });
+        callback(photos);
+      },
+      (error) => {
+        console.warn('Firestore DPP photos listener warning:', error);
+      }
+    );
+  } catch (err) {
+    console.warn('Error subscribing to DPP photos:', err);
+    return () => {};
+  }
+}
+
+export async function saveDppPhotoFirebase(memberName: string, photoUrl: string): Promise<boolean> {
+  try {
+    // 1. Sync to Supabase if configured
+    if (supabase) {
+      try {
+        await supabase.from('dpp_photos').upsert({
+          id: memberName.replace(/[^a-zA-Z0-9_-]/g, '_'),
+          name: memberName,
+          photo_url: photoUrl,
+          updated_at: new Date().toISOString()
+        });
+      } catch (sErr) {
+        console.warn('Supabase DPP photo sync warning:', sErr);
+      }
+    }
+
+    // 2. Sync to Firebase Firestore
+    const docId = memberName.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const docRef = doc(db, DPP_PHOTOS_COLLECTION, docId);
+    await setDoc(docRef, {
+      name: memberName,
+      photoUrl,
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+    return true;
+  } catch (err) {
+    console.error('Error saving DPP photo to Firestore/Supabase:', err);
+    return false;
+  }
+}
+
 export async function seedRegulationsToFirebase(): Promise<boolean> {
   try {
     for (const regDoc of SKATA_REGULATIONS_DATABASE) {
