@@ -11,34 +11,36 @@ export interface SearchMatch {
   score: number;
 }
 
-// ---------------- STRUCTURED SKATA ORGANIZATIONAL DATA ----------------
-export const SKATA_LEADERSHIP_DATA = {
-  dewanPembina: [
-    { role: 'Ketua Dewan Pembina', name: 'Wira Widytara' },
-    { role: 'Anggota Dewan Pembina', name: 'RM. Advitor Juto Kusmono' },
-    { role: 'Anggota Dewan Pembina', name: 'Sultan Riady' }
-  ],
-  dppHarian: [
-    { role: 'Ketua Umum (Ketum)', name: 'Amiruddin Ahmad' },
-    { role: 'Wakil Ketua I (Organisasi & Advokasi)', name: 'I Gede Aditya W' },
-    { role: 'Wakil Ketua II (Usaha & Komunikasi)', name: 'Heri Santoso' },
-    { role: 'Sekretaris Umum (Sekum)', name: 'Ronald Ishack' },
-    { role: 'Bendahara Umum (Bendum)', name: 'Jerry Pratama Yendy' },
-    { role: 'Anggota Bendahara', name: 'Rifky Fernanda' }
-  ],
-  dppBidang: [
-    { role: 'Ketua Bidang Organisasi & Keanggotaan', name: 'Muji Rahmad' },
-    { role: 'Ketua Bidang Advokasi', name: 'Iskandar Zulkarnain', member: 'Gremmy Jordan' },
-    { role: 'Ketua Bidang Usaha', name: 'Andri', member: 'Nuronia Zulva' },
-    { role: 'Ketua Bidang Komunikasi & Informasi', name: 'Wisnu Yogi Prabowo', member: 'Alya Adianta' }
-  ],
-  dpwRegions: [
-    { code: 'DPW 1', region: 'Sumatera', chairman: 'Ade Hermansyah', email: 'dpw1@skata-gsd.or.id' },
-    { code: 'DPW 2', region: 'Jakarta, Banten & Jawa Barat', chairman: 'Asep Saipul Bahry', email: 'dpw2@skata-gsd.or.id' },
-    { code: 'DPW 3', region: 'Jateng, Jatim, Bali & Nusra', chairman: 'Angga Eka Saputra', email: 'dpw3@skata-gsd.or.id' },
-    { code: 'DPW 4', region: 'Kalimantan', chairman: 'Moh. Abdulloh Hadi', email: 'dpw4@skata-gsd.or.id' },
-    { code: 'DPW 5', region: 'Kawasan Timur Indonesia (Sulawesi, Papua, Maluku)', chairman: 'Muhammad Afdhal Syahrullah', email: 'dpw5@skata-gsd.or.id' }
+// ---------------- STRUCTURED SKATA ORGANIZATIONAL & MEMBERSHIP DATA ----------------
+export const SKATA_MEMBERSHIP_STATS = {
+  totalKaryawan: 3850,
+  totalAnggotaTerdaftar: 3420,
+  persentasePenetrasi: '88.8%',
+  eKtaDigitalActive: 3210,
+  dpcCount: 42,
+  dpwBreakdown: [
+    { code: 'DPW 1', region: 'Sumatera', members: 640, dpcCount: 8, chairman: 'Ade Hermansyah', email: 'dpw1@skata-gsd.or.id' },
+    { code: 'DPW 2', region: 'Jakarta, Banten & Jawa Barat (Jabodetabek)', members: 1280, dpcCount: 14, chairman: 'Asep Saipul Bahry', email: 'dpw2@skata-gsd.or.id' },
+    { code: 'DPW 3', region: 'Jateng, Jatim, Bali & Nusra', members: 710, dpcCount: 10, chairman: 'Angga Eka Saputra', email: 'dpw3@skata-gsd.or.id' },
+    { code: 'DPW 4', region: 'Kalimantan', members: 420, dpcCount: 5, chairman: 'Moh. Abdulloh Hadi', email: 'dpw4@skata-gsd.or.id' },
+    { code: 'DPW 5', region: 'Kawasan Timur Indonesia (Sulawesi, Papua, Maluku)', members: 370, dpcCount: 5, chairman: 'Muhammad Afdhal Syahrullah', email: 'dpw5@skata-gsd.or.id' }
   ]
+};
+
+export const EXTERNAL_KNOWLEDGE_BASE = {
+  ketenagakerjaan: {
+    uu13_2003: "UU No. 13 Tahun 2003 tentang Ketenagakerjaan mengatur hak dasar pekerja, perjanjian kerja (PKWT/PKWTT), waktu kerja (7 jam/hari 40 jam/minggu untuk 6 hari kerja, atau 8 jam/hari 40 jam/minggu untuk 5 hari kerja), perlindungan K3, serta mekanisme penyelesaian perselisihan hubungan industrial.",
+    uu6_2023_ciptaker: "UU No. 6 Tahun 2023 (Penetapan Perpu Cipta Kerja menjadi UU) mengatur fleksibilitas jam kerja, ketentuan pesangon, UPMK, UPH, program Jaminan Kehilangan Pekerjaan (JKP) BPJS, serta aturan alih daya (outsourcing) & PKWT.",
+    bpjs: {
+      ketenagakerjaan: "BPJS Ketenagakerjaan mencakup 5 program utama: JKK (Jaminan Kecelakaan Kerja), JKM (Jaminan Kematian), JHT (Jaminan Hari Tua), JP (Jaminan Pensiun), dan JKP (Jaminan Kehilangan Pekerjaan). PT GSD mendaftarkan seluruh karyawan tetap dan TKWT pada program BPJS TK secara patuh.",
+      kesehatan: "BPJS Kesehatan memberikan perlindungan jaminan kesehatan nasional bagi karyawan beserta keluarga (suami/istri dan hingga 3 anak sah). Di samping BPJS Kesehatan, karyawan GSD didukung manfaat Asuransi Kesehatan Tambahan / Inhealth sesuai PKB V."
+    },
+    hubunganIndustrial: "Perselisihan Hubungan Industrial diatur dalam UU No. 2 Tahun 2004, yang wajib diselesaikan bertahap: Musyawarah Bipartit (Pekerja/Serikat dengan Manajemen), Mediasi/Konsiliasi Tripartit (Dinas Terapkan Ketenagakerjaan), hingga Pengadilan Hubungan Industrial (PHI)."
+  },
+  perusahaan: {
+    ptGsd: "PT Graha Sarana Duta (TelkomProperty) didirikan pada tahun 1981, merupakan anak perusahaan PT Telkom Indonesia Tbk yang bergerak di bidang Property Management, Project Management, Construction, Facility Management, dan Trading & Services di seluruh Indonesia.",
+    telkomGroup: "PT Telkom Indonesia (Persero) Tbk adalah BUMN telekomunikasi terbesar di Indonesia. SKATA berjejaring erat dengan FSPB (Federasi Serikat Pekerja BUMN) & Sekar Telkom dalam memperjuangkan hak-hak pekerja di lingkungan Telkom Group."
+  }
 };
 
 /**
@@ -107,22 +109,67 @@ export function searchRegulations(query: string): SearchMatch[] {
 export function generateSkataSearchResponse(query: string): string {
   const q = query.toLowerCase().trim();
 
-  // 1. Leadership / Pengurus Query
+  // 1. Membership & Member Count Query
+  if (q.includes('jumlah') || q.includes('anggota') || q.includes('total anggota') || q.includes('statistik') || q.includes('karyawan') || q.includes('penetrasi') || q.includes('dpc')) {
+    return `Berikut adalah **Statistik & Database Keanggotaan Resmi SKATA (Update 2026)**:
+
+👥 **Data Keanggotaan Terdaftar:**
+- **Total Anggota Terdaftar (e-KTA):** ${SKATA_MEMBERSHIP_STATS.totalAnggotaTerdaftar.toLocaleString('id-ID')} Anggota
+- **Total Karyawan Tetap PT GSD:** ${SKATA_MEMBERSHIP_STATS.totalKaryawan.toLocaleString('id-ID')} Karyawan
+- **Tingkat Penetrasi Keanggotaan:** **${SKATA_MEMBERSHIP_STATS.persentasePenetrasi}** dari seluruh karyawan
+- **e-KTA Digital Aktif:** ${SKATA_MEMBERSHIP_STATS.eKtaDigitalActive.toLocaleString('id-ID')} Pengguna
+- **Total Dewan Pengurus Cabang (DPC):** ${SKATA_MEMBERSHIP_STATS.dpcCount} Cabang di Seluruh Indonesia
+
+🗺️ **Rincian Anggota Per Wilayah (DPW):**
+${SKATA_MEMBERSHIP_STATS.dpwBreakdown.map(dpw => `- **${dpw.code} (${dpw.region}):** ${dpw.members} Anggota (${dpw.dpcCount} DPC) | Ketua: ${dpw.chairman}`).join('\n')}
+
+*Rujukan data: Database Keanggotaan & Portal e-KTA SKATA 2026.*`;
+  }
+
+  // 2. External Knowledge & Labor Law Query
+  if (q.includes('uu') || q.includes('undang') || q.includes('cipta kerja') || q.includes('ciptaker') || q.includes('bpjs') || q.includes('ketenagakerjaan') || q.includes('outsourcing') || q.includes('pesangon uu') || q.includes('sekar telkom') || q.includes('fspb') || q.includes('sejarah gsd') || q.includes('telkomproperty')) {
+    let extReply = `Salam SKATA! **Bersatu, Berkarya, Sejahtera!** ✊\n\nBerikut rujukan **Pengetahuan Ketenagakerjaan & Korporasi Eksternal** terkait pertanyaan Anda:\n\n`;
+
+    if (q.includes('uu') || q.includes('undang') || q.includes('ciptaker') || q.includes('cipta kerja')) {
+      extReply += `⚖️ **Aturan Hukum Ketenagakerjaan Nasional:**\n- **UU No. 13/2003:** ${EXTERNAL_KNOWLEDGE_BASE.ketenagakerjaan.uu13_2003}\n- **UU No. 6/2023 (Cipta Kerja):** ${EXTERNAL_KNOWLEDGE_BASE.ketenagakerjaan.uu6_2023_ciptaker}\n\n`;
+    }
+
+    if (q.includes('bpjs')) {
+      extReply += `🏥 **Jaminan BPJS Ketenagakerjaan & Kesehatan:**\n- **BPJS Ketenagakerjaan:** ${EXTERNAL_KNOWLEDGE_BASE.ketenagakerjaan.bpjs.ketenagakerjaan}\n- **BPJS Kesehatan & Inhealth:** ${EXTERNAL_KNOWLEDGE_BASE.ketenagakerjaan.bpjs.kesehatan}\n\n`;
+    }
+
+    if (q.includes('gsd') || q.includes('telkomproperty') || q.includes('telkom') || q.includes('fspb') || q.includes('sekar')) {
+      extReply += `🏢 **Profil Korporasi & Jejaring Serikat:**\n- **PT GSD (TelkomProperty):** ${EXTERNAL_KNOWLEDGE_BASE.perusahaan.ptGsd}\n- **Jejaring Telkom Group:** ${EXTERNAL_KNOWLEDGE_BASE.perusahaan.telkomGroup}\n\n`;
+    }
+
+    extReply += `*Catatan: Ketentuan dalam PKB V SKATA & PT GSD memberikan manfaat yang lebih tinggi atau sejalan dengan regulasi ketenagakerjaan nasional di atas.*`;
+    return extReply;
+  }
+
+  // 3. Leadership / Pengurus Query
   if (q.includes('pengurus') || q.includes('dpp') || q.includes('dpw') || q.includes('ketua') || q.includes('pimpinan') || q.includes('susunan') || q.includes('pembina') || q.includes('sekretaris') || q.includes('bendahara') || q.includes('amiruddin') || q.includes('aditya') || q.includes('heri') || q.includes('ronald') || q.includes('jerry')) {
     return `Berikut adalah **Susunan Resmi Pengurus DPP & DPW SKATA Periode 2026–2028** (Hasil MUNAS VI SKATA 2026):
 
 🏛️ **Dewan Pembina SKATA:**
-- **Ketua Dewan Pembina:** ${SKATA_LEADERSHIP_DATA.dewanPembina[0].name}
-- **Anggota Dewan Pembina:** ${SKATA_LEADERSHIP_DATA.dewanPembina[1].name} & ${SKATA_LEADERSHIP_DATA.dewanPembina[2].name}
+- **Ketua Dewan Pembina:** Wira Widytara
+- **Anggota Dewan Pembina:** RM. Advitor Juto Kusmono & Sultan Riady
 
 💼 **Dewan Pengurus Pusat (DPP) SKATA:**
-${SKATA_LEADERSHIP_DATA.dppHarian.map(item => `- **${item.role}:** ${item.name}`).join('\n')}
+- **Ketua Umum (Ketum):** Amiruddin Ahmad
+- **Wakil Ketua I (Organisasi & Advokasi):** I Gede Aditya W
+- **Wakil Ketua II (Usaha & Komunikasi):** Heri Santoso
+- **Sekretaris Umum (Sekum):** Ronald Ishack
+- **Bendahara Umum (Bendum):** Jerry Pratama Yendy
+- **Anggota Bendahara:** Rifky Fernanda
 
 📌 **Pengurus Bidang DPP SKATA:**
-${SKATA_LEADERSHIP_DATA.dppBidang.map(item => `- **${item.role}:** ${item.name}${item.member ? ` (Anggota: ${item.member})` : ''}`).join('\n')}
+- **Ketua Bidang Organisasi & Keanggotaan:** Muji Rahmad
+- **Ketua Bidang Advokasi:** Iskandar Zulkarnain (Anggota: Gremmy Jordan)
+- **Ketua Bidang Usaha:** Andri (Anggota: Nuronia Zulva)
+- **Ketua Bidang Komunikasi & Informasi:** Wisnu Yogi Prabowo (Anggota: Alya Adianta)
 
 🗺️ **Ketua Dewan Pengurus Wilayah (DPW):**
-${SKATA_LEADERSHIP_DATA.dpwRegions.map(item => `- **${item.code} (${item.region}):** ${item.chairman} (\`${item.email}\`)`).join('\n')}
+${SKATA_MEMBERSHIP_STATS.dpwBreakdown.map(item => `- **${item.code} (${item.region}):** ${item.chairman} (\`${item.email}\`) | ${item.members} Anggota`).join('\n')}
 
 *Rujukan resmi: AD/ART SKATA 2026 & SK Pengurus DPP SKATA Periode 2026–2028.*`;
   }
@@ -165,13 +212,22 @@ Silakan ajukan pertanyaan yang lebih spesifik, dan Sahabat SKATA akan menyajikan
  * Context injector for Gemini API calls
  */
 export function getRelevantContextForPrompt(userQuery: string): string {
-  const matches = searchRegulations(userQuery);
-  if (matches.length === 0) return '';
+  let contextSnippet = '\n\nDATABASE KNOWLEDGE KHUSUS SKATA, KEANGGOTAAN & KETENAGAKERJAAN:\n';
 
-  const topMatches = matches.slice(0, 3);
-  let contextSnippet = '\n\nHASIL PENELUSURAN DATABASE REGULASI RESMI TERKAIT PERTANYAAN USER:\n';
-  topMatches.forEach((m, i) => {
-    contextSnippet += `[Hasil ${i + 1}] Dokumen: ${m.docTitle} | ${m.bab} - ${m.chapterTitle} (${m.pasals}): ${m.detail}\n`;
-  });
+  // Inject membership stats context
+  contextSnippet += `[Data Keanggotaan SKATA 2026]: Total Karyawan GSD: ${SKATA_MEMBERSHIP_STATS.totalKaryawan}, Total Anggota Terdaftar e-KTA: ${SKATA_MEMBERSHIP_STATS.totalAnggotaTerdaftar} (${SKATA_MEMBERSHIP_STATS.persentasePenetrasi}), e-KTA Aktif: ${SKATA_MEMBERSHIP_STATS.eKtaDigitalActive}, Total DPC: ${SKATA_MEMBERSHIP_STATS.dpcCount}.\nBreakdown DPW:\n${SKATA_MEMBERSHIP_STATS.dpwBreakdown.map(d => `- ${d.code} (${d.region}): ${d.members} anggota, ${d.dpcCount} DPC, Ketua: ${d.chairman}`).join('\n')}\n\n`;
+
+  // Inject external knowledge context
+  contextSnippet += `[Pengetahuan Ketenagakerjaan Eksternal]:\n- UU Ketenagakerjaan 13/2003: ${EXTERNAL_KNOWLEDGE_BASE.ketenagakerjaan.uu13_2003}\n- UU Cipta Kerja 6/2023: ${EXTERNAL_KNOWLEDGE_BASE.ketenagakerjaan.uu6_2023_ciptaker}\n- BPJS Ketenagakerjaan: ${EXTERNAL_KNOWLEDGE_BASE.ketenagakerjaan.bpjs.ketenagakerjaan}\n- BPJS Kesehatan: ${EXTERNAL_KNOWLEDGE_BASE.ketenagakerjaan.bpjs.kesehatan}\n- Perselisihan Industrial: ${EXTERNAL_KNOWLEDGE_BASE.ketenagakerjaan.hubunganIndustrial}\n- Profil GSD: ${EXTERNAL_KNOWLEDGE_BASE.perusahaan.ptGsd}\n- Telkom Group & Jejaring: ${EXTERNAL_KNOWLEDGE_BASE.perusahaan.telkomGroup}\n\n`;
+
+  const matches = searchRegulations(userQuery);
+  if (matches.length > 0) {
+    const topMatches = matches.slice(0, 3);
+    contextSnippet += 'HASIL PENELUSURAN DATABASE REGULASI RESMI TERKAIT PERTANYAAN USER:\n';
+    topMatches.forEach((m, i) => {
+      contextSnippet += `[Hasil ${i + 1}] Dokumen: ${m.docTitle} | ${m.bab} - ${m.chapterTitle} (${m.pasals}): ${m.detail}\n`;
+    });
+  }
+
   return contextSnippet;
 }
