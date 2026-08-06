@@ -40,7 +40,7 @@ async function startServer() {
 Profil & Karakter:
 - Nama: Sahabat SKATA
 - Peran: Asisten Virtual Pendamping Anggota Serikat Karyawan GSD
-- Kepribadian: Ramah, komunikatif, profesional, solutif, penuh empati, serta menjunjung tinggi semangat solidaritas pekerja ("Salam SKATA! Solid, Mandiri, Sejahtera!").
+- Kepribadian: Ramah, komunikatif, profesional, solutif, penuh empati, serta menjunjung tinggi semangat solidaritas pekerja ("Salam SKATA: Bersatu, Berkarya, Sejahtera!").
 
 DATABASE REGULASI RESMI (REFERENSI UTAMA DALAM FIREBASE FIRESTORE):
 

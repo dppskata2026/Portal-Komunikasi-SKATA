@@ -50,7 +50,7 @@ export function SahabatSkataChat({ mode = 'standalone', onClose, onBack }: Sahab
     {
       id: 'welcome-1',
       role: 'assistant',
-      content: `Salam SKATA! **Solid, Mandiri, Sejahtera!** ✊\n\nSaya **Sahabat SKATA**, asisten AI cerdas resmi Serikat Karyawan GSD.\n\nSaya telah terhubung langsung ke **Database Firebase Firestore** yang memuat seluruh dokumen resmi:\n- **Anggaran Dasar (AD) SKATA 2026**\n- **Anggaran Rumah Tangga (ART) SKATA 2026**\n- **Perjanjian Kerja Bersama V (PKB V) SKATA & GSD 2025–2027** (Disahkan Kemenaker RI)\n\nSilakan ajukan pertanyaan seputar hak pekerja, aturan cuti, THR, advokasi, iuran, e-KTA, atau pasal regulasi SKATA!`,
+      content: `Salam SKATA! **Bersatu, Berkarya, Sejahtera!** ✊\n\nSaya **Sahabat SKATA**, asisten AI cerdas resmi Serikat Karyawan GSD.\n\nSaya telah terhubung langsung ke **Database Firebase Firestore** yang memuat seluruh dokumen resmi:\n- **Anggaran Dasar (AD) SKATA 2026**\n- **Anggaran Rumah Tangga (ART) SKATA 2026**\n- **Perjanjian Kerja Bersama V (PKB V) SKATA & GSD 2025–2027** (Disahkan Kemenaker RI)\n\nSilakan ajukan pertanyaan seputar hak pekerja, aturan cuti, THR, advokasi, iuran, e-KTA, atau pasal regulasi SKATA!`,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
