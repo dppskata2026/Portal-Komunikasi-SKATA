@@ -501,55 +501,43 @@ export function EKtaPage({ onBack }: { onBack: () => void }) {
 
         {/* Live ID Card Visualization */}
         <div className="ekta-card-container">
-          <div className="ekta-card">
-            <div className="ekta-card-bg-glow" />
-            <div className="ekta-card-header">
+          <div className="ekta-physical-card">
+            {/* Background geometric overlay */}
+            <div className="ekta-card-geo-bg">
+              <div className="geo-stripe-top-right" />
+              <div className="geo-stripe-bottom-left" />
+            </div>
+
+            {/* Top Right SKATA Logo & Text */}
+            <div className="ekta-card-brand-top">
               <img
                 src={SKATA_LOGO_BASE64}
-                className="ekta-card-logo"
+                className="ekta-card-physical-logo"
                 alt="SKATA"
                 onError={(e) => { (e.target as HTMLImageElement).src = '/skata-logo-official.png'; }}
               />
-              <SkataWordmark size="sm" />
-              <span className="ekta-badge-type">MEMBER</span>
-            </div>
-            
-            <div className="ekta-card-body">
-              {/* Profile Image Simulation */}
-              <div className="ekta-avatar">
-                <User size={45} className="avatar-icon" />
-                <div className="avatar-overlay" />
-              </div>
-
-              <div className="ekta-user-details">
-                <small>NAMA ANGGOTA</small>
-                <strong>{nama || 'NAMA LENGKAP ANGGOTA'}</strong>
-                
-                <small>NIK GSD / NOMOR ANGGOTA (NIA)</small>
-                <strong>{nik || '10002026'}</strong>
-
-                <small>DEWAN PENGURUS WILAYAH</small>
-                <strong>{dpw}</strong>
-              </div>
+              <span className="ekta-card-brand-name">SKATA</span>
             </div>
 
-            <div className="ekta-card-footer">
-              <div className="ekta-stamp">
-                <span className="stamp-circle" />
-                <p>APPROVED</p>
-              </div>
-              <div className="ekta-qr">
-                {/* Simulated QR Code via CSS grid */}
-                <div className="qr-box">
-                  <span /><span /><span /><span />
-                  <span /><span /><span /><span />
-                  <span /><span /><span /><span />
+            {/* Main Gold Embossed Card Content */}
+            <div className="ekta-card-physical-content">
+              <h2 className="ekta-embossed-title">KARTU ANGGOTA</h2>
+              <div className="ekta-embossed-fields">
+                <div className="field-row">
+                  <span className="gold-text-emboss">{nama || 'R. RIZA S PD'}</span>
                 </div>
-                <small>SKATA ID VERIFIED</small>
+                <div className="field-row">
+                  <span className="gold-text-emboss">NIK {nik || '745254'}</span>
+                </div>
               </div>
+            </div>
+
+            {/* Photo at Bottom Center/Left */}
+            <div className="ekta-card-physical-photo">
+              <User size={50} className="photo-placeholder-icon" />
             </div>
           </div>
-          <p className="hint-card-text">Kartu KTA ini dilengkapi QR Code dan enkripsi database internal SKATA GSD.</p>
+          <p className="hint-card-text">Kartu Tanda Anggota Resmi Serikat Karyawan Graha Sarana Duta (SKATA GSD).</p>
         </div>
       </div>
     </SubPageLayout>

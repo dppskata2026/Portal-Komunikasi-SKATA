@@ -42,6 +42,46 @@ const AnonymousAvatar: React.FC<{ size?: number; borderRadius?: string }> = ({ s
   );
 };
 
+export function getStandardDPW(m: { dpw?: string; workLocation?: string; unit?: string }): 'DPP' | 'DPW 1' | 'DPW 2' | 'DPW 3' | 'DPW 4' | 'DPW 5' {
+  const dpwStr = (m.dpw || '').toUpperCase();
+  const locStr = (m.workLocation || '').toUpperCase();
+  const unitStr = (m.unit || '').toUpperCase();
+  const combined = `${dpwStr} ${locStr} ${unitStr}`;
+
+  if (combined.includes('DPP') || combined.includes('PUSAT') || combined.includes('HEAD OFFICE') || combined.includes('FRM') || combined.includes('SEKRETARIAT')) {
+    return 'DPP';
+  }
+  if (combined.includes('DPW 1') || combined.includes('DPW-01') || combined.includes('DPW I') || combined.includes('SUMATERA') || combined.includes('SUMATRA') || combined.includes('MEDAN') || combined.includes('PALEMBANG') || combined.includes('PADANG') || combined.includes('PEKANBARU') || combined.includes('ACEH') || combined.includes('LAMPUNG') || combined.includes('BENGKULU') || combined.includes('JAMBI')) {
+    return 'DPW 1';
+  }
+  if (combined.includes('DPW 2') || combined.includes('DPW-02') || combined.includes('DPW II') || combined.includes('JAKARTA') || combined.includes('BANTEN') || combined.includes('JAWA BARAT') || combined.includes('JABAR') || combined.includes('BANDUNG') || combined.includes('JABODETABEK') || combined.includes('BEKASI') || combined.includes('BOGOR') || combined.includes('TANGERANG') || combined.includes('DEPOK')) {
+    return 'DPW 2';
+  }
+  if (combined.includes('DPW 3') || combined.includes('DPW-03') || combined.includes('DPW III') || combined.includes('JATENG') || combined.includes('JATIM') || combined.includes('JAWA TENGAH') || combined.includes('JAWA TIMUR') || combined.includes('BALI') || combined.includes('SURABAYA') || combined.includes('SEMARANG') || combined.includes('YOGYAKARTA') || combined.includes('JOGJA') || combined.includes('NTB') || combined.includes('NTT') || combined.includes('MATARAM') || combined.includes('KUPANG')) {
+    return 'DPW 3';
+  }
+  if (combined.includes('DPW 4') || combined.includes('DPW-04') || combined.includes('DPW IV') || combined.includes('KALIMANTAN') || combined.includes('BALIKPAPAN') || combined.includes('SAMARINDA') || combined.includes('BANJARMASIN') || combined.includes('PONTIANAK') || combined.includes('IKN') || combined.includes('PALANGKARAYA') || combined.includes('TARAKAN')) {
+    return 'DPW 4';
+  }
+  if (combined.includes('DPW 5') || combined.includes('DPW-05') || combined.includes('DPW V') || combined.includes('TIMUR') || combined.includes('SULAWESI') || combined.includes('MAKASSAR') || combined.includes('MANADO') || combined.includes('PAPUA') || combined.includes('MALUKU') || combined.includes('AMBON') || combined.includes('JAYAPURA') || combined.includes('PALU') || combined.includes('KENDARI') || combined.includes('GORONTALO')) {
+    return 'DPW 5';
+  }
+
+  if (m.dpw && m.dpw !== '-') {
+    const dNum = m.dpw.match(/\d+/);
+    if (dNum) {
+      const num = dNum[0];
+      if (num === '1') return 'DPW 1';
+      if (num === '2') return 'DPW 2';
+      if (num === '3') return 'DPW 3';
+      if (num === '4') return 'DPW 4';
+      if (num === '5') return 'DPW 5';
+    }
+  }
+
+  return 'DPP';
+}
+
 export const TotalAnggotaTable: React.FC = () => {
   const { user, isGuest, isSuperAdmin, isDpp, isDpw } = useAuth();
   const [members, setMembers] = useState<MemberRecord[]>(() => {
@@ -199,30 +239,9 @@ export const TotalAnggotaTable: React.FC = () => {
     };
 
     members.forEach((m) => {
-      const dpwStr = (m.dpw || '').toUpperCase();
-      const locStr = (m.workLocation || '').toUpperCase();
-      const unitStr = (m.unit || '').toUpperCase();
-      const combined = `${dpwStr} ${locStr} ${unitStr}`;
-
-      if (combined.includes('DPP') || combined.includes('PUSAT') || combined.includes('HEAD OFFICE')) {
-        counts['DPP']++;
-      } else if (combined.includes('DPW 1') || combined.includes('DPW I') || combined.includes('SUMATERA') || combined.includes('MEDAN')) {
-        counts['DPW 1']++;
-      } else if (combined.includes('DPW 2') || combined.includes('DPW II') || combined.includes('JAKARTA') || combined.includes('BANTEN') || combined.includes('JAWA BARAT') || combined.includes('JABAR')) {
-        counts['DPW 2']++;
-      } else if (combined.includes('DPW 3') || combined.includes('DPW III') || combined.includes('JATENG') || combined.includes('JATIM') || combined.includes('JAWA TIMUR') || combined.includes('JAWA TENGAH') || combined.includes('BALI') || combined.includes('SURABAYA') || combined.includes('NTB') || combined.includes('NTT')) {
-        counts['DPW 3']++;
-      } else if (combined.includes('DPW 4') || combined.includes('DPW IV') || combined.includes('KALIMANTAN') || combined.includes('BALIKPAPAN') || combined.includes('IKN')) {
-        counts['DPW 4']++;
-      } else if (combined.includes('DPW 5') || combined.includes('DPW V') || combined.includes('TIMUR') || combined.includes('SULAWESI') || combined.includes('MAKASSAR') || combined.includes('PAPUA') || combined.includes('MALUKU')) {
-        counts['DPW 5']++;
-      } else if (m.dpw && m.dpw !== '-') {
-        const dNum = m.dpw.match(/\d+/);
-        if (dNum && counts[`DPW ${dNum[0]}`] !== undefined) {
-          counts[`DPW ${dNum[0]}`]++;
-        } else {
-          counts['DPP']++;
-        }
+      const region = getStandardDPW(m);
+      if (counts[region] !== undefined) {
+        counts[region]++;
       } else {
         counts['DPP']++;
       }
@@ -839,29 +858,27 @@ export const TotalAnggotaTable: React.FC = () => {
               </button>
             </div>
 
-            {/* Upload Button for Pengurus & SuperAdmin */}
-            {!isGuest && (
-              <button
-                onClick={() => setShowUploadModal(true)}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  backgroundColor: '#0284c7',
-                  color: '#ffffff',
-                  border: 'none',
-                  padding: '10px 16px',
-                  borderRadius: '8px',
-                  fontSize: '13px',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 8px rgba(2, 132, 199, 0.25)',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <Upload size={16} /> Upload Data Excel
-              </button>
-            )}
+            {/* Upload Button for Excel Data */}
+            <button
+              onClick={() => setShowUploadModal(true)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                backgroundColor: '#0284c7',
+                color: '#ffffff',
+                border: 'none',
+                padding: '10px 16px',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                boxShadow: '0 2px 8px rgba(2, 132, 199, 0.25)',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Upload size={16} /> Upload Data Excel
+            </button>
 
             {/* Reset Database Button for SuperAdmin */}
             {isSuperAdmin && (
