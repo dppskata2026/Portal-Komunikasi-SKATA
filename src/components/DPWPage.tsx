@@ -79,12 +79,12 @@ export function DPWPage({ onBack, selectedId, navigate }: DPWPageProps) {
       if (firestoreItems && firestoreItems.length > 0) {
         const mappedFirestore: MemberRecord[] = firestoreItems.map((f, index) => ({
           id: f.id || `FS-${index}`,
-          nik: f.nik || `100${29400 + index}`,
+          nik: f.nik || `100020${26 + index}`,
           fullName: f.fullName || 'Nama Tidak Tersedia',
           unit: f.unit || 'Unit Kerja Umum',
           workLocation: f.workLocation || f.dpc || f.dpw || 'Kantor Pusat / FM',
           status: f.status || 'Anggota Aktif',
-          dpw: f.dpw || 'DPW 1',
+          dpw: f.dpw || (f.workLocation?.toUpperCase().includes('PUSAT') ? 'DPP' : 'DPW 1'),
           position: f.position || 'Karyawan',
           corpEmail: f.corpEmail || '',
           phone: f.phone || ''
@@ -110,11 +110,17 @@ export function DPWPage({ onBack, selectedId, navigate }: DPWPageProps) {
             return mappedFirestore;
           }
 
-          const existingNIKs = new Set(currentLocal.map(m => m.nik));
-          const newFromFirestore = mappedFirestore.filter(d => !existingNIKs.has(d.nik));
-          if (newFromFirestore.length === 0) return currentLocal;
+          const firestoreNikMap = new Map(mappedFirestore.map(m => [m.nik, m]));
+          const updatedLocal = currentLocal.map(m => {
+            if (firestoreNikMap.has(m.nik)) {
+              return firestoreNikMap.get(m.nik)!;
+            }
+            return m;
+          });
 
-          return [...currentLocal, ...newFromFirestore];
+          const existingNIKs = new Set(updatedLocal.map(m => m.nik));
+          const brandNewFromFirestore = mappedFirestore.filter(d => !existingNIKs.has(d.nik));
+          return [...updatedLocal, ...brandNewFromFirestore];
         });
       }
     });

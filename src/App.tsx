@@ -475,12 +475,16 @@ function computeActiveMemberCount(firestoreItems: any[] = []): number {
   } catch {}
 
   if (firestoreItems && firestoreItems.length > 0) {
-    if (localMembers.length === 0) {
-      return firestoreItems.length;
-    }
-    const existingNIKs = new Set(localMembers.map((m: any) => m.nik));
+    const firestoreNikMap = new Map(firestoreItems.map((f: any) => [f.nik, f]));
+    const updatedLocal = localMembers.map((m: any) => {
+      if (firestoreNikMap.has(m.nik)) {
+        return { ...m, ...firestoreNikMap.get(m.nik) };
+      }
+      return m;
+    });
+    const existingNIKs = new Set(updatedLocal.map((m: any) => m.nik));
     const newFromFirestore = firestoreItems.filter((f: any) => !existingNIKs.has(f.nik));
-    return localMembers.length + newFromFirestore.length;
+    return updatedLocal.length + newFromFirestore.length;
   }
 
   return localMembers.length;

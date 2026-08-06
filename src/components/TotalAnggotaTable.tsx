@@ -87,7 +87,7 @@ export const TotalAnggotaTable: React.FC = () => {
         const mappedFirestore: MemberRecord[] = firestoreItems.map((f, index) => {
           return {
             id: f.id || `FS-${index}`,
-            nik: f.nik || `100${29400 + index}`,
+            nik: f.nik || `100020${26 + index}`,
             fullName: f.fullName || 'Nama Tidak Tersedia',
             unit: f.unit || 'Unit Kerja Umum',
             workLocation: f.workLocation || f.dpc || f.dpw || 'Kantor Pusat / FM',
@@ -120,14 +120,21 @@ export const TotalAnggotaTable: React.FC = () => {
             return mappedFirestore;
           }
 
-          // Preserve existing user/uploaded members position and data first!
-          const existingNIKs = new Set(currentLocal.map(m => m.nik));
-          const newFromFirestore = mappedFirestore.filter(d => !existingNIKs.has(d.nik));
-          if (newFromFirestore.length === 0) return currentLocal;
+          // Merge Firestore items into local array by updating or appending
+          const firestoreNikMap = new Map(mappedFirestore.map(m => [m.nik, m]));
+          const updatedLocal = currentLocal.map(m => {
+            if (firestoreNikMap.has(m.nik)) {
+              return firestoreNikMap.get(m.nik)!;
+            }
+            return m;
+          });
 
-          const merged = [...currentLocal, ...newFromFirestore];
-          safeSetLocalStorage('skata_total_active_members', merged);
-          return merged;
+          const existingNIKs = new Set(updatedLocal.map(m => m.nik));
+          const brandNewFromFirestore = mappedFirestore.filter(d => !existingNIKs.has(d.nik));
+          const finalMerged = [...updatedLocal, ...brandNewFromFirestore];
+
+          safeSetLocalStorage('skata_total_active_members', finalMerged);
+          return finalMerged;
         });
       }
     });
