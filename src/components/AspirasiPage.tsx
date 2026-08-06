@@ -378,11 +378,12 @@ export function AspirasiPage({ onBack, subpath, navigate }: AspirasiPageProps) {
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                     <label>
-                      Wilayah Asal (DPW)
+                      Wilayah Asal (DPP / DPW)
                       <select
                         value={formData.dpw}
                         onChange={(e) => setFormData({ ...formData, dpw: e.target.value })}
                       >
+                        <option>DPP (Dewan Pengurus Pusat)</option>
                         <option>DPW 1</option>
                         <option>DPW 2</option>
                         <option>DPW 3</option>

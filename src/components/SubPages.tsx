@@ -330,6 +330,7 @@ export function KeanggotaanPage({ onBack }: { onBack: () => void }) {
                     value={formData.dpw}
                     onChange={(e) => setFormData({ ...formData, dpw: e.target.value })}
                   >
+                    <option>DPP - Dewan Pengurus Pusat</option>
                     <option>DPW I - Sumatera</option>
                     <option>DPW II - DKI & Banten</option>
                     <option>DPW III - Jawa Timur & Bali</option>
@@ -406,8 +407,9 @@ export function EKtaPage({ onBack }: { onBack: () => void }) {
   const [syncSource, setSyncSource] = useState<string>('Memuat data...');
 
   const mapDpwStr = (val?: string): string => {
-    if (!val) return 'DPW II - DKI & BANTEN';
+    if (!val) return 'DPP - DEWAN PENGURUS PUSAT';
     const v = val.toUpperCase();
+    if (v.includes('DPP') || v.includes('PUSAT')) return 'DPP - DEWAN PENGURUS PUSAT';
     if (v.includes('1') || v.includes('SUMATERA')) return 'DPW I - SUMATERA';
     if (v.includes('2') || v.includes('DKI') || v.includes('BANTEN') || v.includes('JABODETABEK') || v.includes('JABAR')) return 'DPW II - DKI & BANTEN';
     if (v.includes('3') || v.includes('JATENG') || v.includes('JATIM') || v.includes('BALI') || v.includes('NUSRA')) return 'DPW III - JAWA TIMUR & BALI';
@@ -425,7 +427,7 @@ export function EKtaPage({ onBack }: { onBack: () => void }) {
     } else {
       setNama('AMIRUDDIN AHMAD');
       setNik('10002026');
-      setDpw('DPW II - DKI & BANTEN');
+      setDpw('DPP - DEWAN PENGURUS PUSAT');
       setSyncSource('Data Pengurus DPP SKATA');
     }
 
@@ -476,8 +478,9 @@ export function EKtaPage({ onBack }: { onBack: () => void }) {
               <input type="text" value={nik} onChange={(e) => setNik(e.target.value)} maxLength={12} />
             </label>
             <label>
-              Wilayah DPW
+              Wilayah Kepengurusan (DPP / DPW)
               <select value={dpw} onChange={(e) => setDpw(e.target.value)}>
+                <option value="DPP - DEWAN PENGURUS PUSAT">DPP - DEWAN PENGURUS PUSAT</option>
                 <option value="DPW I - SUMATERA">DPW I - SUMATERA</option>
                 <option value="DPW II - DKI & BANTEN">DPW II - DKI & BANTEN</option>
                 <option value="DPW III - JAWA TIMUR & BALI">DPW III - JAWA TIMUR & BALI</option>
@@ -1249,8 +1252,9 @@ export function AspirasiPage({ onBack }: { onBack: () => void }) {
                 <label htmlFor="anonim">Kirimkan sebagai Anonim (Sembunyikan Nama)</label>
               </div>
               <label>
-                Wilayah Pengurus (DPW Anda)
+                Wilayah Pengurus (DPP / DPW Anda)
                 <select value={form.dpw} onChange={(e) => setForm({ ...form, dpw: e.target.value })}>
+                  <option>DPP - Dewan Pengurus Pusat</option>
                   <option>DPW I - Sumatera</option>
                   <option>DPW II - DKI & Banten</option>
                   <option>DPW III - Jawa Timur & Bali</option>

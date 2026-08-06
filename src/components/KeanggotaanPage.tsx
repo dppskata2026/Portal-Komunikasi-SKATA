@@ -308,6 +308,7 @@ export function KeanggotaanPage({ onBack, showFormInitially = false, defaultTab 
                         value={formData.dpw}
                         onChange={(e) => handleInputChange('dpw', e.target.value)}
                       >
+                        <option>DPP (Dewan Pengurus Pusat)</option>
                         <option>DPW 1</option>
                         <option>DPW 2</option>
                         <option>DPW 3</option>

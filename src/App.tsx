@@ -549,7 +549,7 @@ function ExecutiveDashboard({ navigate }: { navigate: (path: string) => void }) 
           title="Aspirasi Tersampaikan"
           value={4}
           suffix=" Aspirasi"
-          subtitle="100% ditinjau oleh pengurus"
+          subtitle="Ditinjau oleh pengurus"
           accent="gold"
           href="/aspirasi"
           onClick={() => navigate('/aspirasi')}
