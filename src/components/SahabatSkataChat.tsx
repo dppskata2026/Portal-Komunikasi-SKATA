@@ -44,7 +44,6 @@ const SUGGESTED_PROMPTS = [
   'Bagaimana alur advokasi hukum jika terjadi perselisihan kerja?',
   'Siapa saja Susunan Pengurus DPP & DPW SKATA 2026–2028?'
 ];
-
 // Local Knowledge Fallback Engine for Sahabat SKATA AI
 async function getFallbackAiResponse(query: string, messages: Array<{ role: string; content: string }>): Promise<string> {
   const apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY;
@@ -52,17 +51,39 @@ async function getFallbackAiResponse(query: string, messages: Array<{ role: stri
     try {
       const { GoogleGenAI } = await import('@google/genai');
       const ai = new GoogleGenAI({ apiKey });
-      const systemInstruction = `Kamu adalah Sahabat SKATA, Asisten AI Cerdas resmi Serikat Karyawan GSD (PT Graha Sarana Duta / TelkomProperty) yang terhubung ke Database Regulasi Resmi (AD 2026, ART 2026, PKB V 2025-2027). Jawablah dengan ramah, profesional, dan akurat berdasarkan regulasi resmi SKATA.`;
+      const systemInstruction = `Kamu adalah Sahabat SKATA, Asisten AI Cerdas resmi Serikat Karyawan GSD (PT Graha Sarana Duta / TelkomProperty - Anak Perusahaan PT Telkom Indonesia Tbk). Jawablah setiap pertanyaan dengan sangat ramah, profesional, menyambung, dan akurat berdasarkan regulasi resmi SKATA (PKB V 2025–2027, AD & ART 2026). Gunakan format Markdown yang rapi.`;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.6-flash',
-        contents: messages.map((m) => ({
-          role: m.role === 'assistant' ? 'model' : 'user',
-          parts: [{ text: m.content }]
-        })),
-        config: { systemInstruction, temperature: 0.7 }
-      });
-      if (response.text) return response.text;
+      // Clean up message turns so it starts with user and alternates
+      const validMsgs = messages.filter((m) => (m.content || '').trim() !== '');
+      let rawList = validMsgs.map((m) => ({
+        role: m.role === 'assistant' ? ('model' as const) : ('user' as const),
+        text: m.content.trim()
+      }));
+
+      while (rawList.length > 0 && rawList[0].role === 'model') {
+        rawList.shift();
+      }
+
+      const formattedContents: Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }> = [];
+      for (const item of rawList) {
+        if (formattedContents.length > 0 && formattedContents[formattedContents.length - 1].role === item.role) {
+          formattedContents[formattedContents.length - 1].parts[0].text += `\n${item.text}`;
+        } else {
+          formattedContents.push({
+            role: item.role,
+            parts: [{ text: item.text }]
+          });
+        }
+      }
+
+      if (formattedContents.length > 0) {
+        const response = await ai.models.generateContent({
+          model: 'gemini-3.6-flash',
+          contents: formattedContents,
+          config: { systemInstruction, temperature: 0.7 }
+        });
+        if (response.text) return response.text;
+      }
     } catch (gErr) {
       console.warn('Client-side Gemini API fallback error, using SKATA Local Knowledge Engine:', gErr);
     }
@@ -71,12 +92,25 @@ async function getFallbackAiResponse(query: string, messages: Array<{ role: stri
   // Local Knowledge Search Matcher
   const q = query.toLowerCase();
 
-  if (q.includes('pengurus') || q.includes('dpp') || q.includes('dpw') || q.includes('ketua') || q.includes('pimpinan') || q.includes('susunan')) {
-    return `Berikut adalah **Susunan Resmi Pengurus DPP & DPW SKATA 2026–2028** (Hasil MUNAS VI SKATA 2026):
+  // Greetings & Friendly Chit-chat
+  if (q.includes('halo') || q.includes('hai') || q.includes('salam') || q.includes('pagi') || q.includes('siang') || q.includes('malam') || q.includes('terima kasih') || q.includes('terimakasih') || q.includes('makasih')) {
+    return `Salam SKATA! **Bersatu, Berkarya, Sejahtera!** ✊
+
+Selamat datang di layanan konsultasi **Sahabat SKATA AI**. Saya siap membantu menjawab pertanyaan Anda seputar:
+- **Hak Ketenagakerjaan (PKB V 2025–2027)**: Aturan Cuti, THR, Kenaikan Upah, Jam Kerja, dan Benefit.
+- **Regulasi Serikat (AD/ART 2026)**: Keanggotaan, iuran payroll, e-KTA Digital, dan Struktur Pengurus DPP/DPW.
+- **Advokasi & Perlindungan Hukum**: Sanksi disiplin dan pendampingan perselisihan kerja.
+
+Ada yang bisa Sahabat SKATA bantu secara khusus hari ini?`;
+  }
+
+  // Susunan Pengurus & Pimpinan
+  if (q.includes('pengurus') || q.includes('dpp') || q.includes('dpw') || q.includes('ketua') || q.includes('pimpinan') || q.includes('susunan') || q.includes('pembina') || q.includes('sekretaris') || q.includes('bendahara')) {
+    return `Berikut adalah **Susunan Resmi Pengurus DPP & DPW SKATA Periode 2026–2028** (Hasil MUNAS VI SKATA 2026):
 
 🏛️ **Dewan Pembina SKATA:**
 - **Ketua Dewan Pembina:** Wira Widytara
-- **Anggota:** RM. Advitor Juto Kusmono & Sultan Riady
+- **Anggota Dewan Pembina:** RM. Advitor Juto Kusmono & Sultan Riady
 
 💼 **Dewan Pengurus Pusat (DPP) SKATA:**
 - **Ketua Umum (Ketum):** Amiruddin Ahmad
@@ -102,15 +136,16 @@ async function getFallbackAiResponse(query: string, messages: Array<{ role: stri
 *Rujukan resmi: AD/ART SKATA 2026 & SK Pengurus DPP SKATA Periode 2026–2028.*`;
   }
 
-  if (q.includes('cuti') || q.includes('cap') || q.includes('mtm') || q.includes('ijin') || q.includes('izin') || q.includes('melahirkan') || q.includes('sakit')) {
+  // Cuti & Izin
+  if (q.includes('cuti') || q.includes('cap') || q.includes('mtm') || q.includes('ijin') || q.includes('izin') || q.includes('melahirkan') || q.includes('sakit') || q.includes('haji') || q.includes('umroh') || q.includes('libur')) {
     return `Berdasarkan **PKB V SKATA & PT GSD 2025–2027 (BAB VI - Cuti & Izin)**:
 
 🗓️ **1. Cuti Tahunan (Pasal 19):**
-- Hak cuti tahunan adalah **12 hari kerja per tahun** untuk Karyawan Tetap & TKWT (>6 bulan kerja).
+- Hak cuti tahunan adalah **12 hari kerja per tahun** untuk Karyawan Tetap & TKWT (>6 bulan masa kerja).
 - Pengajuan wajib dilakukan minimal **3 hari kerja** sebelumnya.
 
 🎗️ **2. Cuti Alasan Penting / CAP (Pasal 20):**
-- **3 Hari Kerja:** Anggota keluarga sakit keras/dirawat, musibah duka meninggal (istri/suami, anak, ortu/mertua, adik/kakak), pernikahan pertama karyawan, mendampingi istri melahirkan/keguguran, mengurus warisan/hukum.
+- **3 Hari Kerja:** Anggota keluarga sakit keras/rawat inap, musibah duka meninggal (istri/suami, anak, ortu/mertua, adik/kakak), pernikahan pertama karyawan, mendampingi istri melahirkan/keguguran, mengurus warisan/hukum.
 - **2 Hari Kerja:** Pernikahan anak, khitanan/pembaptisan anak.
 - **1 Hari Kerja:** Musibah duka anggota keluarga luar.
 
@@ -122,53 +157,75 @@ async function getFallbackAiResponse(query: string, messages: Array<{ role: stri
 - **1.5 Bulan** untuk keguguran kandungan dengan keterangan dokter.
 
 🏥 **5. Cuti Sakit Berkepanjangan (Pasal 22):**
-- **4 bulan pertama:** Upah dibayar **100% THP**
-- **4 bulan kedua:** Upah dibayar **75% THP**
-- **4 bulan ketiga:** Upah dibayar **50% THP**
-- **Bulan ke-13 dst:** Upah dibayar **25% THP** sebelum evaluasi PHK medis.
+- **4 bulan I:** Upah dibayar **100% THP**
+- **4 bulan II:** Upah dibayar **75% THP**
+- **4 bulan III:** Upah dibayar **50% THP**
+- **Bulan ke-13 dst:** Upah dibayar **25% THP** sebelum evaluasi medis.
 
 *Rujukan resmi: Perjanjian Kerja Bersama (PKB V) SKATA & GSD 2025–2027.*`;
   }
 
-  if (q.includes('gaji') || q.includes('thr') || q.includes('bonus') || q.includes('tunjangan') || q.includes('iuran') || q.includes('pisah')) {
+  // Gaji, THR, Bonus, Benefit, Pensiun, Uang Pisah
+  if (q.includes('gaji') || q.includes('thr') || q.includes('bonus') || q.includes('tunjangan') || q.includes('iuran') || q.includes('pisah') || q.includes('pensiun') || q.includes('upah')) {
     return `Berdasarkan **PKB V SKATA & GSD 2025–2027 (BAB VII - Compensation & Benefit)** & **ART SKATA 2026**:
 
-💵 **1. Kenaikan Gaji (Pasal 28):**
-- Kenaikan upah berkala dilaksanakan setiap awal tahun berdasarkan **Merit System** (Penilaian Kinerja & Bobot Jabatan).
+💵 **1. Kenaikan Gaji Berkala (Pasal 28):**
+- Kenaikan upah dilaksanakan setiap awal tahun berdasarkan **Merit System** (Penilaian Kinerja & Bobot Jabatan).
 
 🌙 **2. Tunjangan Hari Raya / THR (Pasal 29):**
 - **Karyawan Tetap:** Indeks **2x (Basic Salary + Position Allowance)**.
 - **TKWT:** Indeks **1x Basic Salary**.
 - Dicairkan paling lambat **H-14 sebelum Hari Raya Idul Fitri**.
 
-🎁 **3. Bonus & Pajak (Pasal 32 & 33):**
+🎁 **3. Bonus & Pajak PPh (Pasal 32 & 33):**
 - Bonus diberikan berdasarkan pencapaian target RUPS Tahunan PT GSD.
 - **Pajak PPh 21** atas upah, THR, dan bonus ditanggung sepenuhnya oleh Perusahaan PT GSD.
 
-💳 **4. Iuran Keanggotaan SKATA (ART BAB VI):**
-- Iuran dipotong langsung dari payroll bulanan dengan persetujuan Surat Kuasa.
-- Pembagian iuran: **75% DPP SKATA Pusat** dan **25% DPW Wilayah Asal**.
-
-💰 **5. Uang Pisah Resign (Pasal 42):**
+💰 **4. Uang Pisah Resign (Pasal 42) & Pensiun:**
+- Usia Pensiun Normal Karyawan: **56 Tahun**.
 - Masa Kerja < 60 bulan: **20%** dari metode UPMK.
 - Masa Kerja 60–120 bulan: **30%** dari metode UPMK.
 - Masa Kerja > 120 bulan: **50%** dari metode UPMK.
 
+💳 **5. Iuran Keanggotaan SKATA (ART BAB VI):**
+- Iuran dipotong langsung via payroll bulanan dengan Surat Kuasa.
+- Pembagian iuran: **75% DPP SKATA Pusat** dan **25% DPW Wilayah Asal**.
+
 *Rujukan resmi: PKB V SKATA & PT GSD 2025–2027 & ART SKATA 2026.*`;
   }
 
-  if (q.includes('ad') || q.includes('anggaran dasar') || q.includes('visi') || q.includes('misi') || q.includes('logo') || q.includes('asas')) {
+  // e-KTA, Pendaftaran, Syarat Anggota
+  if (q.includes('kta') || q.includes('ekta') || q.includes('daftar') || q.includes('pendaftaran') || q.includes('anggota') || q.includes('syarat')) {
+    return `Berikut informasi **Pendaftaran Anggota & e-KTA Digital SKATA**:
+
+📱 **1. Cara Mendaftar e-KTA Digital:**
+- Buka menu **Layanan > Keanggotaan & e-KTA** pada Portal SKATA.
+- Isi Formulir Pendaftaran Anggota secara lengkap (NIK, Nama, Unit Kerja, DPW/DPC, No HP, dan Email Korporat).
+- Upload tanda tangan digital & persetujuan Surat Kuasa Pemotongan Iuran Keanggotaan via Payroll.
+
+💳 **2. Kartu e-KTA Digital:**
+- Kartu e-KTA digital ber-QR Code resmi akan langsung dapat diunduh/dicetak setelah data terverifikasi oleh DPP/DPW.
+
+👥 **3. Syarat Anggota (AD/ART SKATA 2026):**
+- Merupakan Karyawan Tetap PT Graha Sarana Duta (GSD).
+- Bersedia mendukung asas, visi, misi, dan aturan AD/ART SKATA.
+
+*Rujukan resmi: Anggaran Dasar & Rumah Tangga (AD/ART) SKATA 2026.*`;
+  }
+
+  // AD/ART, Visi, Misi, Kedudukan, Logo
+  if (q.includes('ad') || q.includes('anggaran dasar') || q.includes('visi') || q.includes('misi') || q.includes('logo') || q.includes('asas') || q.includes('kedudukan') || q.includes('alamat')) {
     return `Berikut ringkasan **Anggaran Dasar (AD) SKATA 2026** (Disahkan MUNAS VI SKATA di Bandung, 23 Juli 2026):
 
 🏢 **Identitas & Kedudukan:**
 - **Nama:** Serikat Karyawan GRAHA SARANA DUTA (SKATA).
-- **Sifat:** Independen, demokratis, tidak berafiliasi parpol, beranggotakan karyawan tetap PT GSD.
+- **Sifat:** Independen, demokratis, profesional, tidak berafiliasi parpol, beranggotakan karyawan tetap PT GSD.
 - **Berdiri:** Jakarta, 04 Oktober 2013.
-- **Kedudukan:** Menara Multimedia, Jl. Kebon Sirih No. 12, Jakarta Pusat.
+- **Kedudukan Kantor Pusat:** Menara Multimedia, Jl. Kebon Sirih No. 12, Jakarta Pusat.
 
 🎯 **Asas, Visi & Misi:**
 - **Asas:** Pancasila & UUD 1945.
-- **Visi:** Menjadi organisasi yang berjalan selaras dengan visi perusahaan untuk mewujudkan kesejahteraan dan pemberdayaan anggota.
+- **Visi:** Menjadi organisasi serikat yang berjalan selaras dengan visi perusahaan untuk mewujudkan kesejahteraan dan pemberdayaan anggota.
 - **Misi:** Membawa keseimbangan hubungan kerja strategis, menambah nilai kesejahteraan, dan meningkatkan soliditas anggota & keluarga.
 
 ⚡ **Makna Logo:**
@@ -177,57 +234,36 @@ async function getFallbackAiResponse(query: string, messages: Array<{ role: stri
 *Rujukan resmi: Dokumen Resmi Anggaran Dasar (AD) SKATA 2026.*`;
   }
 
-  if (q.includes('art') || q.includes('anggaran rumah tangga') || q.includes('rapat') || q.includes('munas') || q.includes('muswil') || q.includes('atribut')) {
-    return `Berikut ringkasan **Anggaran Rumah Tangga (ART) SKATA 2026** (Disahkan MUNAS IV SKATA di Bandung, 23 Juli 2026):
-
-👥 **Keanggotaan & Keuangan:**
-- **Syarat Anggota:** Karyawan tetap PT GSD yang mengisi formulir & Surat Kuasa Potong Iuran.
-- **Distribusi Iuran:** 75% Dewan Pengurus Pusat (DPP) & 25% Dewan Pengurus Wilayah (DPW).
-- **Hasil Usaha DPW:** 90% DPW & 10% DPP.
-
-🗳️ **Permusyawaratan & Rapat:**
-- **MUNAS (Musyawarah Nasional):** Pemegang kekuasaan tertinggi tiap 2 tahun.
-- **MUKERNAS:** Rapat kerja nasional tahunan.
-- **MUSWIL & MUSCAB:** Musyawarah tingkat Wilayah & Cabang tiap 2 tahun / 1 tahun.
-- **Masa Bakti Pengurus:** 2 tahun (maksimal 2 periode kepemimpinan).
-
-👔 **Atribut Resmi:**
-- Topi (kegiatan lapangan), Ikat Kepala & Rompi (demonstrasi/mogok kerja), Jas/Seragam/Kaos Resmi (kegiatan indoor & musyawarah).
-
-*Rujukan resmi: Dokumen Resmi Anggaran Rumah Tangga (ART) SKATA 2026.*`;
-  }
-
-  if (q.includes('advokasi') || q.includes('sanksi') || q.includes('sp') || q.includes('phk') || q.includes('disiplin') || q.includes('perselisihan')) {
+  // Disiplin, Advokasi, Sanksi, SP, PHK
+  if (q.includes('advokasi') || q.includes('sanksi') || q.includes('sp') || q.includes('phk') || q.includes('disiplin') || q.includes('perselisihan') || q.includes('hukum')) {
     return `Berdasarkan **PKB V SKATA & GSD (BAB XI - Disiplin & Sanksi)** & **AD/ART SKATA**:
 
 ⚖️ **1. Jenis Sanksi Disiplin Karyawan (Pasal 58–60):**
-- **STT (Surat Teguran Tertulis):** Maksimal 1x dari Kepala Unit.
+- **STT (Surat Teguran Tertulis):** Maksimal 1x dari Atasan/Kepala Unit.
 - **SP-1 (Surat Peringatan Pertama):** Berlaku **6 bulan**, pemotongan bonus/allowance selama 3 bulan.
 - **SP-2 & SP-3:** Berlaku **6 & 12 bulan**, pemotongan bonus/allowance 6–12 bulan dan demosi jabatan.
 
 🚨 **2. Pelanggaran Mendesak / PHK Langsung (Pasal 61):**
-- Pemalsuan dokumen, perkelahian/penganiayaan, penjudian, penggunaan/perekrutan narkoba, tindak pidana/kejahatan, dan pencurian/korupsi yang merugikan perusahaan > Rp 100 juta.
+- Pemalsuan dokumen, perkelahian/penganiayaan, perjudian, penggunaan/perekrutan narkoba, tindak pidana/kejahatan, dan pencurian/korupsi.
 
 🛡️ **3. Layanan Advokasi Serikat SKATA:**
 - Anggota berhak mendapat pendampingan hukum dan pembelaan diri dari Bidang Advokasi SKATA dalam setiap tahapan perselisihan hubungan industrial (Bipartit, Mediasi, hingga PHI).
-- **Kontak Advokasi DPP:** Iskandar Zulkarnain & Gremmy Jordan.
+- **Tim Advokasi DPP SKATA:** Iskandar Zulkarnain & Gremmy Jordan.
 
 *Rujukan resmi: PKB V SKATA & PT GSD 2025–2027 (Pasal 58–64) & AD/ART SKATA.*`;
   }
 
-  // General default response
+  // Flexible Fallback Response tailored to user's question
   return `Salam SKATA! **Bersatu, Berkarya, Sejahtera!** ✊
 
-Saya **Sahabat SKATA**, asisten AI resmi Serikat Karyawan PT Graha Sarana Duta (TelkomProperty).
+Terima kasih atas pertanyaan Anda mengenai **"${query}"**.
 
-Saya dapat membantu menjawab berbagai informasi mengenai:
-1. 📜 **Perjanjian Kerja Bersama V (PKB V) 2025–2027**: Aturan Cuti, Jam Kerja, Kenaikan Gaji, THR, Bonus, MTM, CAP, dan Fasilitas Kesehatan.
-2. 🏛️ **Anggaran Dasar (AD) SKATA 2026**: Visi, Misi, Asas, Kedudukan, dan Sifat Organisasi.
-3. 📘 **Anggaran Rumah Tangga (ART) SKATA 2026**: Tata cara keanggotaan, iuran, atribut, dan jenis permusyawaratan (MUNAS/MUSWIL/MUSCAB).
-4. ⚖️ **Advokasi & Perlindungan Hukum**: Alur penanganan perselisihan kerja, aturan sanksi SP-1 s.d. SP-3, dan hak-hak pekerja.
-5. 👤 **Susunan Pengurus DPP & DPW SKATA 2026–2028**.
+Sahabat SKATA siap memberikan pendampingan dan penjelasan berdasarkan **Database Regulasi Resmi SKATA & PT GSD**:
+- 📜 **Perjanjian Kerja Bersama V (PKB V) 2025–2027**
+- 🏛️ **Anggaran Dasar (AD) & Anggaran Rumah Tangga (ART) SKATA 2026**
+- 👥 **Portal Keanggotaan & Layanan e-KTA Digital**
 
-Silakan ketik pertanyaan spesifik Anda di bawah ini!`;
+Silakan ajukan pertanyaan yang lebih rinci (misalnya: aturan cuti, Kenaikan Upah, THR, pengurus DPW, pendaftaran e-KTA, atau advokasi hukum), dan Sahabat SKATA akan menyajikannya dengan rinci beserta rujukan pasalnya!`;
 }
 
 export function SahabatSkataChat({ mode = 'standalone', onClose, onBack }: SahabatSkataChatProps) {
