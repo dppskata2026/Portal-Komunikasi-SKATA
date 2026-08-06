@@ -89,7 +89,7 @@ export const TotalAnggotaTable: React.FC = () => {
             unit: f.unit || 'Unit Kerja Umum',
             workLocation: f.workLocation || f.dpc || f.dpw || 'Kantor Pusat / FM',
             status: f.status || 'Anggota Aktif',
-            dpw: f.dpw || 'DPW 1',
+            dpw: f.dpw || (f.workLocation?.toUpperCase().includes('PUSAT') ? 'DPP' : 'DPW 1'),
             position: f.position || 'Karyawan',
             corpEmail: f.corpEmail || '',
             phone: f.phone || ''
@@ -206,8 +206,15 @@ export const TotalAnggotaTable: React.FC = () => {
         counts['DPW 4']++;
       } else if (combined.includes('DPW 5') || combined.includes('DPW V') || combined.includes('TIMUR') || combined.includes('SULAWESI') || combined.includes('MAKASSAR') || combined.includes('PAPUA') || combined.includes('MALUKU')) {
         counts['DPW 5']++;
+      } else if (m.dpw && m.dpw !== '-') {
+        const dNum = m.dpw.match(/\d+/);
+        if (dNum && counts[`DPW ${dNum[0]}`] !== undefined) {
+          counts[`DPW ${dNum[0]}`]++;
+        } else {
+          counts['DPP']++;
+        }
       } else {
-        counts['DPW 1']++;
+        counts['DPP']++;
       }
     });
 
@@ -302,11 +309,22 @@ export const TotalAnggotaTable: React.FC = () => {
             return '';
           };
 
-          const nik = getVal('NIK', 'NIK Karyawan', 'No. NIK', 'nik') || `99${idx + 1000}`;
-          const fullName = getVal('Nama Karyawan', 'Nama', 'Nama Lengkap', 'fullName') || `Anggota ${idx + 1}`;
-          const unit = getVal('Nama Unit', 'Unit', 'Unit Kerja', 'unit') || '-';
-          const workLocation = getVal('Kantor', 'Lokasi Kerja', 'Kantor / Lokasi Kerja', 'workLocation') || '-';
-          const dpw = getVal('Wilayah', 'Wilayah DPW', 'DPW', 'dpw') || '-';
+          const nik = getVal('NIK', 'NIK Karyawan', 'No. NIK', 'nik', 'no_nik', 'id') || `99${idx + 1000}`;
+          const fullName = getVal('Nama Karyawan', 'Nama', 'Nama Lengkap', 'fullName', 'nama_lengkap', 'karyawan') || `Anggota ${idx + 1}`;
+          const unit = getVal('Nama Unit', 'Unit', 'Unit Kerja', 'unit', 'divisi', 'departemen') || '-';
+          const workLocation = getVal('Kantor', 'Lokasi Kerja', 'Kantor / Lokasi Kerja', 'workLocation', 'lokasi', 'site') || '-';
+          let dpw = getVal('Wilayah', 'Wilayah DPW', 'DPW', 'dpw', 'regional', 'daerah') || '-';
+
+          // Auto detect DPW from workLocation or Unit if DPW column is missing
+          if (!dpw || dpw === '-') {
+            const comb = `${workLocation} ${unit}`.toUpperCase();
+            if (comb.includes('PUSAT') || comb.includes('DPP') || comb.includes('HEAD OFFICE')) dpw = 'DPP';
+            else if (comb.includes('SUMATERA') || comb.includes('MEDAN')) dpw = 'DPW 1';
+            else if (comb.includes('JAKARTA') || comb.includes('BANTEN') || comb.includes('JAWA BARAT') || comb.includes('JABAR')) dpw = 'DPW 2';
+            else if (comb.includes('JATENG') || comb.includes('JATIM') || comb.includes('BALI') || comb.includes('SURABAYA')) dpw = 'DPW 3';
+            else if (comb.includes('KALIMANTAN') || comb.includes('BALIKPAPAN') || comb.includes('IKN')) dpw = 'DPW 4';
+            else if (comb.includes('TIMUR') || comb.includes('SULAWESI') || comb.includes('MAKASSAR') || comb.includes('PAPUA')) dpw = 'DPW 5';
+          }
           const phone = getVal('Nomor HP', 'No HP', 'No. HP', 'HP', 'Phone', 'Telepon', 'phone') || '';
           const corpEmail = getVal('Email', 'Corp Email', 'Email Korporat', 'Email Perusahaan', 'corpEmail') || '';
           const rawStatus = getVal('Status Keanggotaan', 'Status', 'status') || 'Aktif';
