@@ -68,7 +68,7 @@ async function getFallbackAiResponse(query: string, messages: Array<{ role: stri
         }
       }
 
-      const candidateModels = ['gemini-2.5-flash', 'gemini-3.6-flash', 'gemini-2.5-pro'];
+      const candidateModels = ['gemini-3.6-flash', 'gemini-2.0-flash', 'gemini-2.5-pro'];
       for (const modelName of candidateModels) {
         try {
           if (formattedContents.length > 0) {
