@@ -1404,31 +1404,21 @@ function Footer({ navigate }: { navigate: (path: string) => void }) {
 function LoginModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   if (!open) return null;
   return (
-    <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
-      <section
-        className="login-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="login-title"
+    <div className="modal-backdrop" role="presentation" onMouseDown={onClose} style={{ zIndex: 9999 }}>
+      <div
+        style={{ width: '100%', maxWidth: '1080px', maxHeight: '92vh', overflowY: 'auto', borderRadius: '28px', position: 'relative' }}
         onMouseDown={(event) => event.stopPropagation()}
       >
-        <button className="modal-close" aria-label="Tutup" onClick={onClose}>
-          <X />
+        <button
+          className="modal-close"
+          aria-label="Tutup"
+          onClick={onClose}
+          style={{ position: 'absolute', top: '16px', right: '16px', zIndex: 100, background: 'rgba(255,255,255,0.9)', color: '#0f172a', border: 'none', borderRadius: '50%', width: '36px', height: '36px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}
+        >
+          <X size={20} />
         </button>
-        <OfficialSkataLogo className="modal-logo" />
-        <h2 id="login-title">Login Anggota</h2>
-        <p>Masuk ke layanan anggota SKATA.</p>
-        <label>
-          Email atau NIK
-          <input type="text" placeholder="Masukkan email atau NIK" />
-        </label>
-        <label>
-          Kata sandi
-          <input type="password" placeholder="Masukkan kata sandi" />
-        </label>
-        <button className="button primary modal-submit">Masuk</button>
-        <small>Modul autentikasi Firebase akan diaktifkan pada sprint berikutnya.</small>
-      </section>
+        <LoginPage onSuccess={onClose} onBack={onClose} />
+      </div>
     </div>
   );
 }

@@ -515,6 +515,67 @@ button, a { -webkit-tap-highlight-color: transparent; }
   animation-play-state: paused !important;
 }
 
+/* Running Text Marquee Banner */
+.skata-running-text-bar {
+  width: 100%;
+  background: linear-gradient(90deg, #7f1d1d 0%, #dc2626 30%, #e51b23 50%, #b91c1c 80%, #991b1b 100%);
+  color: #ffffff;
+  padding: 10px 16px;
+  overflow: hidden;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(229, 27, 35, 0.3);
+  display: flex;
+  align-items: center;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.25);
+  position: relative;
+  z-index: 10;
+}
+
+.skata-running-text-label {
+  background: #ffffff;
+  color: #dc2626;
+  font-weight: 850;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 5px 12px;
+  border-radius: 20px;
+  margin-right: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.skata-running-text-overflow {
+  overflow: hidden;
+  width: 100%;
+  display: flex;
+}
+
+.skata-running-text-track {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: skataMarqueeLoop 38s linear infinite;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.skata-running-text-bar:hover .skata-running-text-track {
+  animation-play-state: paused !important;
+}
+
+@keyframes skataMarqueeLoop {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-33.333333%);
+  }
+}
+
 @media (max-width: 640px) {
   .hidden-mobile-badge {
     display: none !important;

@@ -4,6 +4,7 @@ import { useAuth } from '../lib/useAuth';
 import { SkataWordmark } from './SkataWordmark';
 import { SKATA_LOGO_BASE64 } from '../assets/logoBase64';
 import { KeanggotaanPage as KeanggotaanPageFull } from './KeanggotaanPage';
+import { LoginPage as LoginPageMain } from './LoginPage';
 import {
   BookOpenText,
   UsersRound,
@@ -2518,87 +2519,5 @@ export function KontakPage({ onBack }: { onBack: () => void }) {
 
 /* 14. LOGIN PAGE */
 export function LoginPage({ onBack }: { onBack: () => void }) {
-  const [email, setEmail] = useState('');
-  const [pwd, setPwd] = useState('');
-  const [loggedIn, setLoggedIn] = useState(false);
-
-  const handleLoginSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !pwd) {
-      alert('Harap masukkan email/NIK dan kata sandi Anda.');
-      return;
-    }
-    setLoggedIn(true);
-  };
-
-  return (
-    <SubPageLayout
-      title="Login Anggota SKATA"
-      description="Gunakan hak akses keanggotaan terverifikasi Anda untuk mengelola e-KTA, mengajukan iuran, aduan hukum, dan klaim kesejahteraan."
-      icon={Lock}
-      onBack={onBack}
-    >
-      <div className="form-card-wrapper" style={{ maxWidth: '480px', marginInline: 'auto' }}>
-        {!loggedIn ? (
-          <form onSubmit={handleLoginSubmit} className="premium-form">
-            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-              <img
-                src={SKATA_LOGO_BASE64}
-                style={{ width: '80px', height: 'auto', marginBottom: '12px' }}
-                alt="SKATA"
-                onError={(e) => { (e.target as HTMLImageElement).src = '/skata-logo-official.png'; }}
-              />
-              <h2>Sistem Layanan Anggota</h2>
-              <p style={{ fontSize: '13px', color: '#666' }}>Silakan login menggunakan NIK atau email terdaftar Anda.</p>
-            </div>
-
-            <label>
-              Alamat Email / NIK Karyawan
-              <input
-                type="text"
-                required
-                placeholder="Masukkan email atau NIK Anda"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </label>
-
-            <label>
-              Kata Sandi Anda
-              <input
-                type="password"
-                required
-                placeholder="Masukkan kata sandi Anda"
-                value={pwd}
-                onChange={(e) => setPwd(e.target.value)}
-              />
-            </label>
-
-            <button type="submit" className="button primary w-full" style={{ marginTop: '12px' }}>
-              Masuk Layanan Anggota
-            </button>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginTop: '14px', color: 'var(--red)' }}>
-              <a href="#forgot" onClick={(e) => { e.preventDefault(); alert('Modul reset sandi sedang dikembangkan.'); }}>Lupa kata sandi?</a>
-              <a href="/layanan/keanggotaan">Daftar Anggota Baru</a>
-            </div>
-            <small style={{ display: 'block', textAlign: 'center', marginTop: '24px', color: '#888' }}>
-              Sistem Otentikasi Terenkripsi © DPP SKATA GSD
-            </small>
-          </form>
-        ) : (
-          <div className="success-form-panel" style={{ textAlign: 'center' }}>
-            <span className="success-glow">✓</span>
-            <h2>Selamat Datang Kembali!</h2>
-            <p>Sesi login untuk <strong>{email}</strong> berhasil dibuat.</p>
-            <p className="note-text" style={{ fontSize: '13px' }}>
-              Anda sekarang memiliki akses penuh ke portal iuran koperasi, verifikasi e-KTA, dan helpdesk hukum SKATA.
-            </p>
-            <button className="button primary w-full" onClick={() => setLoggedIn(false)}>
-              Keluar Sesi / Logout
-            </button>
-          </div>
-        )}
-      </div>
-    </SubPageLayout>
-  );
+  return <LoginPageMain onBack={onBack} onSuccess={onBack} />;
 }
