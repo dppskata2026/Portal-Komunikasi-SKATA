@@ -6,7 +6,8 @@ interface BreadcrumbsProps {
 }
 
 export function Breadcrumbs({ path, navigate }: BreadcrumbsProps) {
-  const segments = path.split('/').filter(Boolean);
+  const cleanPath = path.split('?')[0];
+  const segments = cleanPath.split('/').filter(Boolean);
   if (segments.length === 0) return null;
 
   const getLabel = (segment: string) => {

@@ -383,12 +383,12 @@ export function AspirasiPage({ onBack, subpath, navigate }: AspirasiPageProps) {
                         value={formData.dpw}
                         onChange={(e) => setFormData({ ...formData, dpw: e.target.value })}
                       >
-                        <option>DPP (Dewan Pengurus Pusat)</option>
-                        <option>DPW 1</option>
-                        <option>DPW 2</option>
-                        <option>DPW 3</option>
-                        <option>DPW 4</option>
-                        <option>DPW 5</option>
+                        <option value="DPP (Dewan Pengurus Pusat)">DPP (Dewan Pengurus Pusat)</option>
+                        <option value="DPW 1">DPW 1 - Sumatera</option>
+                        <option value="DPW 2">DPW 2 - Jakarta, Banten & Jawa Barat</option>
+                        <option value="DPW 3">DPW 3 - Jateng, Jatim, Bali & Nusa Tenggara</option>
+                        <option value="DPW 4">DPW 4 - Kalimantan</option>
+                        <option value="DPW 5">DPW 5 - Kawasan Timur Indonesia (Sulawesi, Maluku, Papua)</option>
                       </select>
                     </label>
 

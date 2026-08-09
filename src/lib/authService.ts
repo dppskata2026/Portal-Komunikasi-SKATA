@@ -103,7 +103,11 @@ export function canManageDpwMembers(role: UserRole): boolean {
 }
 
 export function canPublishNews(role: UserRole): boolean {
-  return role === 'superadmin' || role === 'dpp' || role === 'dpw';
+  return role === 'superadmin';
+}
+
+export function canManageNews(role: UserRole): boolean {
+  return role === 'superadmin';
 }
 
 export function canManageUsers(role: UserRole): boolean {

@@ -1,8 +1,9 @@
 import { useState, useMemo, useEffect } from 'react';
-import { subscribeNewsArticles, addNewsArticleFirebase, deleteNewsArticleFirebase, safeSetLocalStorage, subscribeMemberships } from '../lib/firestoreService';
+import { subscribeNewsArticles, addNewsArticleFirebase, updateNewsArticleFirebase, deleteNewsArticleFirebase, safeSetLocalStorage, subscribeMemberships } from '../lib/firestoreService';
 import { useAuth } from '../lib/useAuth';
 import { SkataWordmark } from './SkataWordmark';
 import { SKATA_LOGO_BASE64 } from '../assets/logoBase64';
+import { KeanggotaanPage as KeanggotaanPageFull } from './KeanggotaanPage';
 import {
   BookOpenText,
   UsersRound,
@@ -30,6 +31,24 @@ import {
   Lock,
   ChevronDown,
   ChevronUp,
+  Flame,
+  Newspaper,
+  Megaphone,
+  Sparkles,
+  Search,
+  Plus,
+  X,
+  Tag,
+  Calendar,
+  Eye,
+  Trash2,
+  Share2,
+  ArrowRight,
+  Filter,
+  PenSquare,
+  Pencil,
+  Image as ImageIcon,
+  BookOpen,
 } from 'lucide-react';
 
 /* Reusable Container for Premium Subpages */
@@ -232,169 +251,7 @@ export function TentangPage({ onBack, navigateTo }: { onBack: () => void; naviga
 
 /* 2. KEANGGOTAAN PAGE */
 export function KeanggotaanPage({ onBack }: { onBack: () => void }) {
-  const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [formData, setFormData] = useState({
-    nama: '',
-    nik: '',
-    email: '',
-    telepon: '',
-    dpw: 'DPW I - DKI Jakarta',
-    unit: '',
-    persetujuan: false,
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (step === 1) {
-      if (!formData.nama || !formData.nik || !formData.email) {
-        alert('Harap isi nama, NIK, dan email Anda.');
-        return;
-      }
-      setStep(2);
-    } else if (step === 2) {
-      if (!formData.unit || !formData.persetujuan) {
-        alert('Harap isi unit kerja dan setujui pernyataan.');
-        return;
-      }
-      setStep(3);
-    }
-  };
-
-  return (
-    <SubPageLayout
-      title="Pendaftaran Anggota"
-      description="Lengkapi formulir pendaftaran digital untuk mendapatkan Nomor Induk Anggota (NIA) SKATA GSD."
-      icon={UsersRound}
-      onBack={onBack}
-    >
-      <div className="form-steps-indicator">
-        <div className={`step-dot ${step >= 1 ? 'active' : ''}`}><span>1</span><p>Data Pribadi</p></div>
-        <div className="step-line" />
-        <div className={`step-dot ${step >= 2 ? 'active' : ''}`}><span>2</span><p>Penempatan Kerja</p></div>
-        <div className="step-line" />
-        <div className={`step-dot ${step === 3 ? 'active' : ''}`}><span>3</span><p>Selesai</p></div>
-      </div>
-
-      <div className="form-card-wrapper">
-        {step < 3 ? (
-          <form onSubmit={handleSubmit} className="premium-form">
-            {step === 1 && (
-              <div className="form-fields">
-                <label>
-                  Nama Lengkap Sesuai KTP
-                  <input
-                    type="text"
-                    required
-                    placeholder="Masukkan nama lengkap Anda"
-                    value={formData.nama}
-                    onChange={(e) => setFormData({ ...formData, nama: e.target.value })}
-                  />
-                </label>
-                <label>
-                  Nomor Induk Karyawan (NIK GSD)
-                  <input
-                    type="text"
-                    required
-                    placeholder="Masukkan NIK Karyawan Anda"
-                    value={formData.nik}
-                    onChange={(e) => setFormData({ ...formData, nik: e.target.value })}
-                  />
-                </label>
-                <label>
-                  Alamat Email Aktif
-                  <input
-                    type="email"
-                    required
-                    placeholder="nama.anda@example.com"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  />
-                </label>
-                <label>
-                  Nomor WhatsApp Aktif
-                  <input
-                    type="tel"
-                    placeholder="Contoh: 0812XXXXXXXX"
-                    value={formData.telepon}
-                    onChange={(e) => setFormData({ ...formData, telepon: e.target.value })}
-                  />
-                </label>
-              </div>
-            )}
-
-            {step === 2 && (
-              <div className="form-fields">
-                <label>
-                  Wilayah Kepengurusan (DPW)
-                  <select
-                    value={formData.dpw}
-                    onChange={(e) => setFormData({ ...formData, dpw: e.target.value })}
-                  >
-                    <option>DPP - Dewan Pengurus Pusat</option>
-                    <option>DPW I - Sumatera</option>
-                    <option>DPW II - DKI & Banten</option>
-                    <option>DPW III - Jawa Timur & Bali</option>
-                    <option>DPW IV - Kalimantan</option>
-                    <option>DPW V - Sulawesi & Timur</option>
-                  </select>
-                </label>
-                <label>
-                  Unit Kerja / Lokasi Penempatan
-                  <input
-                    type="text"
-                    required
-                    placeholder="Contoh: Area Network Bandung, Telkom Landmark Tower"
-                    value={formData.unit}
-                    onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                  />
-                </label>
-                <div className="checkbox-block">
-                  <input
-                    type="checkbox"
-                    id="persetujuan"
-                    required
-                    checked={formData.persetujuan}
-                    onChange={(e) => setFormData({ ...formData, persetujuan: e.target.checked })}
-                  />
-                  <label htmlFor="persetujuan">
-                    Saya menyatakan bersedia bergabung menjadi anggota SKATA GSD secara sadar, tunduk pada
-                    AD/ART organisasi, serta bersedia menyalurkan iuran keanggotaan berkala.
-                  </label>
-                </div>
-              </div>
-            )}
-
-            <div className="form-actions-row">
-              {step === 2 && (
-                <button type="button" className="button outline" onClick={() => setStep(1)}>
-                  Kembali
-                </button>
-              )}
-              <button type="submit" className="button primary">
-                {step === 1 ? 'Lanjutkan' : 'Kirim Pendaftaran'}
-              </button>
-            </div>
-          </form>
-        ) : (
-          <div className="success-form-panel">
-            <span className="success-glow"><CheckCircle size={58} /></span>
-            <h2>Pendaftaran Berhasil Terkirim!</h2>
-            <p>
-              Terima kasih, rekan <strong>{formData.nama}</strong>. Pendaftaran Anda dengan NIK{' '}
-              <strong>{formData.nik}</strong> telah masuk ke database registrasi DPP SKATA GSD.
-            </p>
-            <p className="note-text">
-              Tim bidang keanggotaan akan segera memverifikasi data Anda dalam waktu 1x24 jam kerja. Kartu Anggota
-              Digital (e-KTA) Anda akan diterbitkan secara otomatis setelah verifikasi selesai.
-            </p>
-            <button className="button primary" onClick={() => setStep(1)}>
-              Daftarkan Anggota Baru
-            </button>
-          </div>
-        )}
-      </div>
-    </SubPageLayout>
-  );
+  return <KeanggotaanPageFull onBack={onBack} defaultTab="daftar" />;
 }
 
 /* 3. E-KTA PAGE (DASHBOARD-GRADE LIVE CARD GENERATOR) */
@@ -482,10 +339,10 @@ export function EKtaPage({ onBack }: { onBack: () => void }) {
               <select value={dpw} onChange={(e) => setDpw(e.target.value)}>
                 <option value="DPP - DEWAN PENGURUS PUSAT">DPP - DEWAN PENGURUS PUSAT</option>
                 <option value="DPW I - SUMATERA">DPW I - SUMATERA</option>
-                <option value="DPW II - DKI & BANTEN">DPW II - DKI & BANTEN</option>
-                <option value="DPW III - JAWA TIMUR & BALI">DPW III - JAWA TIMUR & BALI</option>
+                <option value="DPW II - JAKARTA, BANTEN & JAWA BARAT">DPW II - JAKARTA, BANTEN & JAWA BARAT</option>
+                <option value="DPW III - JATENG, JATIM, BALI & NUSA TENGGARA">DPW III - JATENG, JATIM, BALI & NUSA TENGGARA</option>
                 <option value="DPW IV - KALIMANTAN">DPW IV - KALIMANTAN</option>
-                <option value="DPW V - SULAWESI & TIMUR">DPW V - SULAWESI & TIMUR</option>
+                <option value="DPW V - KAWASAN TIMUR INDONESIA">DPW V - KAWASAN TIMUR INDONESIA</option>
               </select>
             </label>
             <button className="button primary w-full" onClick={() => setShowDemo(true)}>
@@ -1243,11 +1100,11 @@ export function AspirasiPage({ onBack }: { onBack: () => void }) {
                 Wilayah Pengurus (DPP / DPW Anda)
                 <select value={form.dpw} onChange={(e) => setForm({ ...form, dpw: e.target.value })}>
                   <option>DPP - Dewan Pengurus Pusat</option>
-                  <option>DPW I - Sumatera</option>
-                  <option>DPW II - DKI & Banten</option>
-                  <option>DPW III - Jawa Timur & Bali</option>
-                  <option>DPW IV - Kalimantan</option>
-                  <option>DPW V - Sulawesi & Timur</option>
+                  <option>DPW 1 - Sumatera</option>
+                  <option>DPW 2 - Jakarta, Banten & Jawa Barat</option>
+                  <option>DPW 3 - Jateng, Jatim, Bali & Nusa Tenggara</option>
+                  <option>DPW 4 - Kalimantan</option>
+                  <option>DPW 5 - Kawasan Timur Indonesia</option>
                 </select>
               </label>
               <label>
@@ -1299,14 +1156,16 @@ export function AspirasiPage({ onBack }: { onBack: () => void }) {
   );
 }
 
-/* 12. BERITA PAGE (NEWS DIRECTORY WITH FULL MODAL VIEW & TULIS BERITA FORM) */
+/* 12. BERITA PAGE (NEWS DIRECTORY WITH REDESIGNED COLORFUL & ENGAGING LAYOUT) */
 export function BeritaPage({ onBack }: { onBack: () => void }) {
+  const { isSuperAdmin } = useAuth();
   const [activeCat, setActiveCat] = useState('Semua');
   const [searchTerm, setSearchTerm] = useState('');
   const [readingArticle, setReadingArticle] = useState<any | null>(null);
 
-  // Form states for writing new news
+  // Form states for writing / editing news
   const [isWriting, setIsWriting] = useState(false);
+  const [editingArticle, setEditingArticle] = useState<any | null>(null);
   const [newTitle, setNewTitle] = useState('');
   const [newCategory, setNewCategory] = useState('Berita Utama');
   const [newBody, setNewBody] = useState('');
@@ -1314,21 +1173,12 @@ export function BeritaPage({ onBack }: { onBack: () => void }) {
   const [newPhotoPreview, setNewPhotoPreview] = useState('/assets/skata-hero-visual.png');
   const [publishSuccess, setPublishSuccess] = useState(false);
 
-  const REMOVED_TITLES = [
-    'SKATA Memperkuat Kolaborasi dan Hubungan Industrial yang Harmonis',
-    'Rapat Anggota Tahunan SKATA 2026',
-    'Pembaruan Data dan Verifikasi Anggota',
-    'Program Pelatihan Hubungan Industrial',
-  ];
-
   const [articles, setArticles] = useState<any[]>(() => {
     try {
       const stored = localStorage.getItem('skata_news_articles');
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          return parsed.filter((item: any) => !REMOVED_TITLES.includes(item.title));
-        }
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch {
       // Fallback
@@ -1339,9 +1189,10 @@ export function BeritaPage({ onBack }: { onBack: () => void }) {
   // Real-time listener for Firestore news
   useEffect(() => {
     const unsubscribe = subscribeNewsArticles((firestoreArticles) => {
-      const filtered = firestoreArticles.filter((item) => !REMOVED_TITLES.includes(item.title));
-      setArticles(filtered);
-      safeSetLocalStorage('skata_news_articles', filtered);
+      if (firestoreArticles.length > 0) {
+        setArticles(firestoreArticles);
+        safeSetLocalStorage('skata_news_articles', firestoreArticles);
+      }
     });
     return () => unsubscribe();
   }, []);
@@ -1364,7 +1215,6 @@ export function BeritaPage({ onBack }: { onBack: () => void }) {
     if (e) e.stopPropagation();
     if (!window.confirm('Apakah Anda yakin ingin menghapus berita ini?')) return;
     
-    // Delete from Firestore
     try {
       await deleteNewsArticleFirebase(id);
     } catch {
@@ -1379,13 +1229,67 @@ export function BeritaPage({ onBack }: { onBack: () => void }) {
     }
   };
 
+  const handleStartWrite = () => {
+    if (!isSuperAdmin) return;
+    setEditingArticle(null);
+    setNewTitle('');
+    setNewCategory('Berita Utama');
+    setNewBody('');
+    setNewPhotoUrl('');
+    setNewPhotoPreview('/assets/skata-hero-visual.png');
+    setIsWriting(true);
+  };
+
+  const handleStartEdit = (article: any, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!isSuperAdmin) return;
+    setEditingArticle(article);
+    setNewTitle(article.title || '');
+    setNewCategory(article.category || 'Berita Utama');
+    setNewBody(article.body || '');
+    setNewPhotoUrl(article.image && !article.image.startsWith('data:') ? article.image : '');
+    setNewPhotoPreview(article.image || '/assets/skata-hero-visual.png');
+    setIsWriting(true);
+  };
+
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        const res = reader.result as string;
-        setNewPhotoPreview(res);
+        const rawUrl = reader.result as string;
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const maxDim = 800; // Resize to max 800px dimension for optimal Firestore document size (< 150KB)
+
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.75);
+            setNewPhotoPreview(compressedDataUrl);
+          } else {
+            setNewPhotoPreview(rawUrl);
+          }
+        };
+        img.onerror = () => {
+          setNewPhotoPreview(rawUrl);
+        };
+        img.src = rawUrl;
       };
       reader.readAsDataURL(file);
     }
@@ -1393,6 +1297,10 @@ export function BeritaPage({ onBack }: { onBack: () => void }) {
 
   const handlePublishNews = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isSuperAdmin) {
+      alert('Hanya Super Admin yang diizinkan untuk menerbitkan atau mengedit berita.');
+      return;
+    }
     if (!newTitle.trim() || !newBody.trim()) return;
 
     const now = new Date();
@@ -1401,41 +1309,95 @@ export function BeritaPage({ onBack }: { onBack: () => void }) {
 
     const excerptText = newBody.trim().length > 150 ? newBody.trim().substring(0, 147) + '...' : newBody.trim();
 
-    const newArticleData = {
-      category: newCategory,
-      title: newTitle.trim(),
-      excerpt: excerptText,
-      body: newBody.trim(),
-      date: formattedDate,
-      image: newPhotoPreview || '/assets/skata-hero-visual.png',
-      createdAt: new Date().toISOString()
-    };
-
-    try {
-      const docId = await addNewsArticleFirebase(newArticleData);
-      const newArticle = { id: docId, ...newArticleData };
-      const updatedArticles = [newArticle, ...articles.filter(a => a.id !== docId)];
-      setArticles(updatedArticles);
-      safeSetLocalStorage('skata_news_articles', updatedArticles);
-    } catch (err) {
-      // Fallback
-      const fallbackArticle = { id: `ART-${Date.now()}`, ...newArticleData };
-      const updatedArticles = [fallbackArticle, ...articles];
-      setArticles(updatedArticles);
-      safeSetLocalStorage('skata_news_articles', updatedArticles);
+    // Ensure photo is not exceeding safe length (fallback if needed)
+    let safePhoto = newPhotoPreview || '/assets/skata-hero-visual.png';
+    if (safePhoto.startsWith('data:') && safePhoto.length > 800000) {
+      // If photo base64 is still huge (>800KB), fallback to hero visual to prevent Firestore doc size limit errors
+      safePhoto = '/assets/skata-hero-visual.png';
     }
 
-    setPublishSuccess(true);
-    setTimeout(() => {
-      setPublishSuccess(false);
+    if (editingArticle) {
+      // UPDATE EXISTING ARTICLE
+      const updatedFields = {
+        category: newCategory,
+        title: newTitle.trim(),
+        excerpt: excerptText,
+        body: newBody.trim(),
+        date: editingArticle.date || formattedDate,
+        image: safePhoto,
+      };
+
+      // Close modal & reset form immediately
       setIsWriting(false);
-      // Reset form
+      setEditingArticle(null);
       setNewTitle('');
       setNewBody('');
       setNewCategory('Berita Utama');
       setNewPhotoUrl('');
       setNewPhotoPreview('/assets/skata-hero-visual.png');
-    }, 1200);
+
+      try {
+        await updateNewsArticleFirebase(editingArticle.id, updatedFields);
+      } catch (err) {
+        console.warn('Firebase update failed, updating locally:', err);
+      }
+
+      const updatedArticles = articles.map((a) => a.id === editingArticle.id ? { ...a, ...updatedFields } : a);
+      setArticles(updatedArticles);
+      safeSetLocalStorage('skata_news_articles', updatedArticles);
+
+      if (readingArticle && readingArticle.id === editingArticle.id) {
+        setReadingArticle({ ...readingArticle, ...updatedFields });
+      }
+    } else {
+      // CREATE NEW ARTICLE
+      const newArticleData = {
+        category: newCategory,
+        title: newTitle.trim(),
+        excerpt: excerptText,
+        body: newBody.trim(),
+        date: formattedDate,
+        image: safePhoto,
+        createdAt: new Date().toISOString()
+      };
+
+      // Reset category and search filters so new article is immediately visible
+      setActiveCat('Semua');
+      setSearchTerm('');
+
+      // Close modal & reset form immediately upon publishing
+      setIsWriting(false);
+      setEditingArticle(null);
+      setNewTitle('');
+      setNewBody('');
+      setNewCategory('Berita Utama');
+      setNewPhotoUrl('');
+      setNewPhotoPreview('/assets/skata-hero-visual.png');
+
+      try {
+        const docId = await addNewsArticleFirebase(newArticleData);
+        const newArticle = { id: docId, ...newArticleData };
+        const updatedArticles = [newArticle, ...articles.filter(a => a.id !== docId)];
+        setArticles(updatedArticles);
+        safeSetLocalStorage('skata_news_articles', updatedArticles);
+      } catch (err) {
+        console.warn('Firebase save failed, attempting with fallback photo:', err);
+        try {
+          const fallbackData = { ...newArticleData, image: '/assets/skata-hero-visual.png' };
+          const docId = await addNewsArticleFirebase(fallbackData);
+          const newArticle = { id: docId, ...fallbackData };
+          const updatedArticles = [newArticle, ...articles.filter(a => a.id !== docId)];
+          setArticles(updatedArticles);
+          safeSetLocalStorage('skata_news_articles', updatedArticles);
+        } catch (innerErr) {
+          console.error('All Firestore saves failed:', innerErr);
+          const fallbackArticle = { id: `ART-${Date.now()}`, ...newArticleData };
+          const updatedArticles = [fallbackArticle, ...articles];
+          setArticles(updatedArticles);
+          safeSetLocalStorage('skata_news_articles', updatedArticles);
+        }
+      }
+    }
   };
 
   const filtered = articles.filter(
@@ -1445,151 +1407,634 @@ export function BeritaPage({ onBack }: { onBack: () => void }) {
         a.excerpt.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
+  // Category Configuration for Colors and Icons
+  const CATEGORY_META: Record<string, { icon: any; gradient: string; textColor: string; bgSoft: string; borderColor: string }> = {
+    'Berita Utama': {
+      icon: Flame,
+      gradient: 'linear-gradient(135deg, #ef4444, #dc2626)',
+      textColor: '#dc2626',
+      bgSoft: '#fef2f2',
+      borderColor: '#fca5a5'
+    },
+    'Agenda': {
+      icon: CalendarDays,
+      gradient: 'linear-gradient(135deg, #8b5cf6, #6d28d9)',
+      textColor: '#7c3aed',
+      bgSoft: '#f5f3ff',
+      borderColor: '#ddd6fe'
+    },
+    'Pengumuman': {
+      icon: Megaphone,
+      gradient: 'linear-gradient(135deg, #f59e0b, #d97706)',
+      textColor: '#d97706',
+      bgSoft: '#fffbeb',
+      borderColor: '#fde68a'
+    },
+    'Pendidikan': {
+      icon: GraduationCap,
+      gradient: 'linear-gradient(135deg, #10b981, #059669)',
+      textColor: '#059669',
+      bgSoft: '#ecfdf5',
+      borderColor: '#a7f3d0'
+    }
+  };
+
+  // Featured Top Article (Spotlight)
+  const featuredArticle = articles.find(a => a.category === 'Berita Utama') || articles[0];
+
   return (
     <SubPageLayout
-      title="Portal Berita & Agenda"
-      description="Dapatkan berita utama, kalender agenda organisasi, diklat pengumuman resmi dari dewan pengurus pusat SKATA GSD."
-      icon={CalendarDays}
+      title="Portal Berita & Agenda SKATA"
+      description="Kabar utama, kalender agenda organisasi, pengumuman resmi, dan materi edukasi serikat karyawan SKATA GSD."
+      icon={Newspaper}
       onBack={onBack}
     >
-      <div className="news-page-container">
-        {/* Top Control Bar: Search, Category Filters, and Write News Action */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800 }}>Daftar Berita & Pengumuman</h3>
-            <button
-              className="button primary"
-              onClick={() => setIsWriting(true)}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
-            >
-              ✍️ Tulis Berita Baru
-            </button>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+        
+        {/* Top Stat Overview Bar */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '16px' }}>
+          <div style={{ background: 'linear-gradient(135deg, #ffffff, #f8fafc)', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '18px 20px', display: 'flex', alignItems: 'center', gap: '16px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Newspaper size={24} />
+            </div>
+            <div>
+              <div style={{ fontSize: '22px', fontWeight: 900, color: '#0f172a', lineHeight: 1 }}>{articles.length}</div>
+              <div style={{ fontSize: '12.5px', color: '#64748b', fontWeight: 600, marginTop: '4px' }}>Total Berita & Agenda</div>
+            </div>
           </div>
 
-          <div className="table-filter-row" style={{ gap: '16px', display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
-            <input
-              type="text"
-              className="search-input-field"
-              style={{ flex: 1, minWidth: '240px' }}
-              placeholder="🔍 Cari berita, agenda, atau program..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <div className="category-pill-row">
-              {['Semua', 'Berita Utama', 'Agenda', 'Pengumuman', 'Pendidikan'].map((cat) => (
-                <button
-                  key={cat}
-                  className={`cat-pill ${activeCat === cat ? 'active' : ''}`}
-                  onClick={() => setActiveCat(cat)}
-                >
-                  {cat}
-                </button>
-              ))}
+          <div style={{ background: 'linear-gradient(135deg, #ffffff, #fef2f2)', border: '1px solid #fca5a5', borderRadius: '16px', padding: '18px 20px', display: 'flex', alignItems: 'center', gap: '16px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'linear-gradient(135deg, #ef4444, #dc2626)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Flame size={24} />
+            </div>
+            <div>
+              <div style={{ fontSize: '22px', fontWeight: 900, color: '#991b1b', lineHeight: 1 }}>{articles.filter(a => a.category === 'Berita Utama').length}</div>
+              <div style={{ fontSize: '12.5px', color: '#b91c1c', fontWeight: 600, marginTop: '4px' }}>Berita Utama</div>
+            </div>
+          </div>
+
+          <div style={{ background: 'linear-gradient(135deg, #ffffff, #f5f3ff)', border: '1px solid #ddd6fe', borderRadius: '16px', padding: '18px 20px', display: 'flex', alignItems: 'center', gap: '16px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CalendarDays size={24} />
+            </div>
+            <div>
+              <div style={{ fontSize: '22px', fontWeight: 900, color: '#5b21b6', lineHeight: 1 }}>{articles.filter(a => a.category === 'Agenda').length}</div>
+              <div style={{ fontSize: '12.5px', color: '#6d28d9', fontWeight: 600, marginTop: '4px' }}>Agenda Organisasi</div>
+            </div>
+          </div>
+
+          <div style={{ background: 'linear-gradient(135deg, #ffffff, #fffbeb)', border: '1px solid #fde68a', borderRadius: '16px', padding: '18px 20px', display: 'flex', alignItems: 'center', gap: '16px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Megaphone size={24} />
+            </div>
+            <div>
+              <div style={{ fontSize: '22px', fontWeight: 900, color: '#78350f', lineHeight: 1 }}>{articles.filter(a => a.category === 'Pengumuman' || a.category === 'Pendidikan').length}</div>
+              <div style={{ fontSize: '12.5px', color: '#b45309', fontWeight: 600, marginTop: '4px' }}>Pengumuman & Edukasi</div>
             </div>
           </div>
         </div>
 
-        {/* News Cards Grid */}
-        <div className="org-grid-two" style={{ marginTop: '16px' }}>
-          {filtered.map((a) => (
-            <div className="news-grid-card" key={a.id}>
-              <div className="news-card-img-shell">
-                <img src={a.image} alt={a.title} onError={(e) => { (e.target as HTMLImageElement).src = '/assets/skata-hero-visual.png'; }} />
-                <span className="news-card-cat-badge">{a.category}</span>
+        {/* Featured Headline Hero Banner */}
+        {featuredArticle && (
+          <div style={{
+            background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #31103f 100%)',
+            borderRadius: '24px',
+            overflow: 'hidden',
+            boxShadow: '0 12px 30px rgba(15, 23, 42, 0.15)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            color: '#fff',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            alignItems: 'center'
+          }}>
+            <div style={{ padding: '32px 36px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', flexWrap: 'wrap' }}>
+                <span style={{
+                  background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                  padding: '6px 14px',
+                  borderRadius: '20px',
+                  fontWeight: 800,
+                  fontSize: '12px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 4px 12px rgba(239, 68, 68, 0.4)'
+                }}>
+                  <Flame size={14} /> SOROTAN UTAMA
+                </span>
+                <span style={{ fontSize: '12.5px', color: '#cbd5e1', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <Calendar size={13} /> {featuredArticle.date}
+                </span>
               </div>
-              <div className="news-card-body">
-                <small className="news-card-date">📅 {a.date}</small>
-                <h3>{a.title}</h3>
-                <p>{a.excerpt}</p>
-                <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
-                  <button className="button outline" style={{ flex: 1 }} onClick={() => setReadingArticle(a)}>
-                    Baca Selengkapnya
-                  </button>
-                  <button
-                    className="button outline"
-                    style={{ color: '#dc2626', borderColor: '#fca5a5', padding: '6px 12px' }}
-                    onClick={(e) => handleDeleteNews(a.id, e)}
-                    title="Hapus Berita Ini"
-                  >
-                    🗑️ Hapus
-                  </button>
-                </div>
+
+              <h2 style={{ fontSize: '24px', fontWeight: 900, lineHeight: 1.3, margin: '0 0 14px', color: '#ffffff', letterSpacing: '-0.01em' }}>
+                {featuredArticle.title}
+              </h2>
+
+              <p style={{ fontSize: '14px', color: '#cbd5e1', lineHeight: 1.6, margin: '0 0 24px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                {featuredArticle.excerpt}
+              </p>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => setReadingArticle(featuredArticle)}
+                  style={{
+                    background: 'linear-gradient(135deg, #e51b23, #b91c1c)',
+                    color: '#fff',
+                    border: 'none',
+                    padding: '12px 22px',
+                    borderRadius: '12px',
+                    fontWeight: 800,
+                    fontSize: '13.5px',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    boxShadow: '0 6px 20px rgba(229, 27, 35, 0.4)',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <Eye size={16} /> Baca Berita Utama <ArrowRight size={16} />
+                </button>
+
+                {isSuperAdmin && (
+                  <>
+                    <button
+                      onClick={() => handleStartEdit(featuredArticle)}
+                      style={{
+                        background: 'rgba(59, 130, 246, 0.25)',
+                        backdropFilter: 'blur(8px)',
+                        color: '#fff',
+                        border: '1px solid rgba(147, 197, 253, 0.5)',
+                        padding: '12px 20px',
+                        borderRadius: '12px',
+                        fontWeight: 700,
+                        fontSize: '13.5px',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}
+                    >
+                      <Pencil size={16} /> Edit Berita Utama
+                    </button>
+
+                    <button
+                      onClick={handleStartWrite}
+                      style={{
+                        background: 'rgba(255,255,255,0.12)',
+                        backdropFilter: 'blur(8px)',
+                        color: '#fff',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        padding: '12px 20px',
+                        borderRadius: '12px',
+                        fontWeight: 700,
+                        fontSize: '13.5px',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}
+                    >
+                      <Plus size={16} /> Tulis Berita Baru
+                    </button>
+                  </>
+                )}
               </div>
             </div>
-          ))}
-          {filtered.length === 0 && (
-            <div style={{ textAlign: 'center', gridColumn: 'span 2', padding: '48px 20px', background: '#f8f9fa', borderRadius: '16px', border: '1px dashed #cbd5e1' }}>
-              <p style={{ margin: '0 0 12px', fontSize: '15px', fontWeight: 600, color: '#475569' }}>
-                {articles.length === 0
-                  ? 'Belum ada berita yang diterbitkan.'
-                  : 'Tidak ada berita yang cocok dengan pencarian Anda.'}
+
+            <div style={{ position: 'relative', height: '100%', minHeight: '260px', overflow: 'hidden' }}>
+              <img
+                src={featuredArticle.image}
+                alt={featuredArticle.title}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                onError={(e) => { (e.target as HTMLImageElement).src = '/assets/skata-hero-visual.png'; }}
+              />
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, #0f172a 0%, transparent 40%)' }} />
+            </div>
+          </div>
+        )}
+
+        {/* Controls: Vibrant Category Tabs & Search Bar */}
+        <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '20px', padding: '20px 24px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
+            <div>
+              <h3 style={{ margin: '0 0 4px', fontSize: '19px', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Sparkles size={20} style={{ color: '#e51b23' }} /> Kabar & Agenda Organisasi
+              </h3>
+              <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
+                Gunakan kategori di bawah untuk memfilter informasi resmi SKATA
               </p>
+            </div>
+
+            {isSuperAdmin && (
               <button
-                className="button primary"
-                onClick={() => setIsWriting(true)}
-                style={{ fontSize: '13px' }}
+                onClick={handleStartWrite}
+                style={{
+                  background: 'linear-gradient(135deg, #e51b23, #b91c1c)',
+                  color: '#fff',
+                  border: 'none',
+                  padding: '10px 18px',
+                  borderRadius: '10px',
+                  fontWeight: 800,
+                  fontSize: '13.5px',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: '0 4px 14px rgba(229, 27, 35, 0.3)'
+                }}
               >
-                ✍️ Tulis Berita Pertama
+                <PenSquare size={16} /> Tulis Berita Baru
               </button>
+            )}
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {/* Search Input Field */}
+            <div style={{ position: 'relative', width: '100%' }}>
+              <input
+                type="text"
+                placeholder="🔍 Cari berita, artikel, agenda rapat, atau pengumuman..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '12px 18px 12px 42px',
+                  borderRadius: '12px',
+                  border: '1px solid #cbd5e1',
+                  fontSize: '14px',
+                  background: '#f8fafc',
+                  outline: 'none',
+                  transition: 'all 0.2s'
+                }}
+              />
+              <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px' }}
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+
+            {/* Category Filter Pills */}
+            <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '4px' }}>
+              {/* All Option */}
+              <button
+                onClick={() => setActiveCat('Semua')}
+                style={{
+                  padding: '9px 16px',
+                  borderRadius: '12px',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  border: activeCat === 'Semua' ? 'none' : '1px solid #e2e8f0',
+                  background: activeCat === 'Semua' ? 'linear-gradient(135deg, #0f172a, #334155)' : '#f8fafc',
+                  color: activeCat === 'Semua' ? '#ffffff' : '#475569',
+                  boxShadow: activeCat === 'Semua' ? '0 4px 12px rgba(15, 23, 42, 0.25)' : 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <Sparkles size={14} /> Semua ({articles.length})
+              </button>
+
+              {/* Category Options */}
+              {Object.keys(CATEGORY_META).map((catKey) => {
+                const meta = CATEGORY_META[catKey];
+                const CatIcon = meta.icon;
+                const count = articles.filter(a => a.category === catKey).length;
+                const isActive = activeCat === catKey;
+
+                return (
+                  <button
+                    key={catKey}
+                    onClick={() => setActiveCat(catKey)}
+                    style={{
+                      padding: '9px 16px',
+                      borderRadius: '12px',
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      border: isActive ? 'none' : `1px solid ${meta.borderColor}`,
+                      background: isActive ? meta.gradient : meta.bgSoft,
+                      color: isActive ? '#ffffff' : meta.textColor,
+                      boxShadow: isActive ? '0 4px 12px rgba(0,0,0,0.15)' : 'none',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      whiteSpace: 'nowrap',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    <CatIcon size={14} /> {catKey} ({count})
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* News Cards Grid Container */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '24px' }}>
+          {filtered.map((article) => {
+            const meta = CATEGORY_META[article.category] || CATEGORY_META['Berita Utama'];
+            const CatIcon = meta.icon;
+
+            return (
+              <div
+                key={article.id}
+                style={{
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '20px',
+                  overflow: 'hidden',
+                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.03)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  transition: 'all 0.25s ease',
+                  position: 'relative'
+                }}
+                className="news-card-hover"
+              >
+                {/* Image Cover Banner */}
+                <div style={{ position: 'relative', width: '100%', height: '200px', overflow: 'hidden', background: '#f1f5f9' }}>
+                  <img
+                    src={article.image}
+                    alt={article.title}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease' }}
+                    onError={(e) => { (e.target as HTMLImageElement).src = '/assets/skata-hero-visual.png'; }}
+                  />
+                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 100%)' }} />
+
+                  {/* Floating Category Badge */}
+                  <span
+                    style={{
+                      position: 'absolute',
+                      top: '14px',
+                      left: '14px',
+                      background: meta.gradient,
+                      color: '#ffffff',
+                      padding: '5px 12px',
+                      borderRadius: '20px',
+                      fontSize: '11.5px',
+                      fontWeight: 800,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
+                      letterSpacing: '0.02em'
+                    }}
+                  >
+                    <CatIcon size={13} /> {article.category}
+                  </span>
+
+                  {/* Floating Date Badge */}
+                  <span
+                    style={{
+                      position: 'absolute',
+                      bottom: '12px',
+                      right: '14px',
+                      background: 'rgba(15, 23, 42, 0.8)',
+                      backdropFilter: 'blur(8px)',
+                      color: '#ffffff',
+                      padding: '4px 10px',
+                      borderRadius: '8px',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px'
+                    }}
+                  >
+                    <Calendar size={12} /> {article.date}
+                  </span>
+                </div>
+
+                {/* Card Content Body */}
+                <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
+                  <div>
+                    <h3 style={{ fontSize: '17px', fontWeight: 800, color: '#0f172a', margin: '0 0 8px', lineHeight: 1.35 }}>
+                      {article.title}
+                    </h3>
+                    <p style={{ fontSize: '13.5px', color: '#64748b', lineHeight: 1.55, margin: '0 0 16px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      {article.excerpt}
+                    </p>
+                  </div>
+
+                  {/* Action Buttons Footer */}
+                  <div style={{ paddingTop: '14px', borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                    <button
+                      onClick={() => setReadingArticle(article)}
+                      style={{
+                        background: meta.bgSoft,
+                        color: meta.textColor,
+                        border: `1px solid ${meta.borderColor}`,
+                        padding: '8px 14px',
+                        borderRadius: '10px',
+                        fontWeight: 800,
+                        fontSize: '12.5px',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <Eye size={14} /> Baca Selengkapnya <ArrowRight size={13} />
+                    </button>
+
+                    {isSuperAdmin && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <button
+                          onClick={(e) => handleStartEdit(article, e)}
+                          title="Edit Berita Ini"
+                          style={{
+                            background: '#eff6ff',
+                            color: '#1d4ed8',
+                            border: '1px solid #bfdbfe',
+                            padding: '8px 12px',
+                            borderRadius: '10px',
+                            fontWeight: 800,
+                            fontSize: '12px',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px'
+                          }}
+                        >
+                          <Pencil size={13} /> Edit
+                        </button>
+
+                        <button
+                          onClick={(e) => handleDeleteNews(article.id, e)}
+                          title="Hapus Berita Ini"
+                          style={{
+                            background: '#fef2f2',
+                            color: '#dc2626',
+                            border: '1px solid #fca5a5',
+                            padding: '8px 10px',
+                            borderRadius: '10px',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          {filtered.length === 0 && (
+            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 20px', background: '#ffffff', borderRadius: '24px', border: '2px dashed #cbd5e1' }}>
+              <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#ffebeb', color: '#e51b23', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                <Newspaper size={32} />
+              </div>
+              <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: '0 0 6px' }}>
+                {articles.length === 0 ? 'Belum Ada Berita Terpublikasi' : 'Tidak Ada Berita Ditemukan'}
+              </h3>
+              <p style={{ fontSize: '14px', color: '#64748b', maxWidth: '480px', margin: '0 auto 20px' }}>
+                {articles.length === 0
+                  ? 'Publikasikan berita utama, agenda rapat, atau pengumuman resmi pertama Anda untuk portal SKATA.'
+                  : `Tidak ada artikel yang cocok dengan pencarian "${searchTerm}" atau kategori "${activeCat}".`}
+              </p>
+              {isSuperAdmin && (
+                <button
+                  onClick={handleStartWrite}
+                  style={{
+                    background: 'linear-gradient(135deg, #e51b23, #b91c1c)',
+                    color: '#fff',
+                    border: 'none',
+                    padding: '12px 24px',
+                    borderRadius: '12px',
+                    fontWeight: 800,
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <Plus size={18} /> Tulis Berita Baru Sekarang
+                </button>
+              )}
             </div>
           )}
         </div>
 
-        {/* Modal Tulis Berita Baru */}
+        {/* Modal Tulis & Terbitkan Berita Baru */}
         {isWriting && (
           <div className="modal-backdrop" role="presentation" onMouseDown={() => setIsWriting(false)}>
             <div
               className="login-modal"
-              style={{ width: 'min(740px, 95%)', textAlign: 'left', maxHeight: '90vh', overflowY: 'auto' }}
+              style={{ width: 'min(760px, 95%)', textAlign: 'left', maxHeight: '90vh', overflowY: 'auto', borderRadius: '24px', padding: 0 }}
               role="dialog"
               onMouseDown={(e) => e.stopPropagation()}
             >
-              <button className="modal-close" onClick={() => setIsWriting(false)}>
-                ✕
-              </button>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-                <div style={{ background: 'rgba(223, 18, 26, 0.1)', color: 'var(--red)', width: '44px', height: '44px', borderRadius: '12px', display: 'grid', placeItems: 'center', fontSize: '20px', fontWeight: 'bold' }}>
-                  ✍️
-                </div>
-                <div>
-                  <h2 style={{ fontSize: '20px', margin: 0, fontWeight: 800 }}>Tulis & Terbitkan Berita Baru</h2>
-                  <p style={{ margin: 0, fontSize: '13px', color: '#666' }}>
-                    Publikasikan kabar terbaru, pengumuman resmi, atau agenda organisasi SKATA
-                  </p>
+              {/* Modal Banner Header */}
+              <div style={{ background: 'linear-gradient(135deg, #e51b23, #991b1b)', padding: '24px 28px', color: '#fff', position: 'relative' }}>
+                <button
+                  className="modal-close"
+                  onClick={() => setIsWriting(false)}
+                  style={{ color: '#fff', top: '20px', right: '20px', background: 'rgba(255,255,255,0.2)' }}
+                >
+                  ✕
+                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <div style={{ background: 'rgba(255,255,255,0.2)', width: '48px', height: '48px', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {editingArticle ? <Pencil size={24} /> : <PenSquare size={24} />}
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '20px', margin: 0, fontWeight: 900, color: '#fff' }}>
+                      {editingArticle ? 'Edit & Perbarui Berita' : 'Tulis & Terbitkan Berita Baru'}
+                    </h2>
+                    <p style={{ margin: '2px 0 0', fontSize: '13px', color: '#fca5a5' }}>
+                      {editingArticle ? 'Perbarui judul, kategori, foto sampul, atau isi berita resmi SKATA' : 'Publikasikan kabar terbaru, pengumuman resmi, atau agenda organisasi SKATA'}
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              <form onSubmit={handlePublishNews} className="premium-form no-margin">
-                {/* 1. Foto Berita */}
-                <div style={{ marginBottom: '18px' }}>
-                  <label style={{ display: 'block', fontWeight: 700, fontSize: '13.5px', marginBottom: '6px' }}>
-                    📷 Foto Berita (Gambar Sampul)
+              {/* Modal Form Body */}
+              <form onSubmit={handlePublishNews} style={{ padding: '28px' }}>
+                
+                {/* 1. Kategori Selection Pills */}
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontWeight: 800, fontSize: '13.5px', color: '#0f172a', marginBottom: '8px' }}>
+                    🏷️ Pilih Kategori Berita / Pengumuman
                   </label>
-                  <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px' }}>
+                    {Object.keys(CATEGORY_META).map((catKey) => {
+                      const meta = CATEGORY_META[catKey];
+                      const CatIcon = meta.icon;
+                      const isSelected = newCategory === catKey;
+
+                      return (
+                        <button
+                          type="button"
+                          key={catKey}
+                          onClick={() => setNewCategory(catKey)}
+                          style={{
+                            padding: '10px',
+                            borderRadius: '12px',
+                            border: isSelected ? `2px solid ${meta.textColor}` : '1px solid #e2e8f0',
+                            background: isSelected ? meta.bgSoft : '#ffffff',
+                            color: isSelected ? meta.textColor : '#475569',
+                            fontWeight: 800,
+                            fontSize: '12.5px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            justifyContent: 'center',
+                            transition: 'all 0.2s'
+                          }}
+                        >
+                          <CatIcon size={16} /> {catKey}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 2. Gambar Sampul / Foto Berita */}
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontWeight: 800, fontSize: '13.5px', color: '#0f172a', marginBottom: '8px' }}>
+                    📷 Foto Sampul / Visual Berita
+                  </label>
+                  <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap', background: '#f8fafc', padding: '16px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
                     <div
                       style={{
-                        width: '140px',
-                        height: '90px',
-                        borderRadius: '10px',
+                        width: '130px',
+                        height: '85px',
+                        borderRadius: '12px',
                         overflow: 'hidden',
-                        border: '1px solid rgba(0,0,0,0.12)',
-                        background: '#f8f9fa',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                        border: '1px solid #cbd5e1',
+                        background: '#e2e8f0',
                         flexShrink: 0
                       }}
                     >
                       <img
                         src={newPhotoPreview}
-                        alt="Preview Foto Berita"
+                        alt="Preview Foto"
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         onError={(e) => { (e.target as HTMLImageElement).src = '/assets/skata-hero-visual.png'; }}
                       />
                     </div>
                     <div style={{ flex: 1, minWidth: '220px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <input
                           type="file"
                           accept="image/*"
@@ -1599,14 +2044,25 @@ export function BeritaPage({ onBack }: { onBack: () => void }) {
                         />
                         <label
                           htmlFor="news-photo-upload"
-                          className="button outline"
-                          style={{ cursor: 'pointer', display: 'inline-flex', fontSize: '13px', padding: '6px 14px' }}
+                          style={{
+                            cursor: 'pointer',
+                            background: '#ffffff',
+                            border: '1px solid #cbd5e1',
+                            padding: '8px 14px',
+                            borderRadius: '8px',
+                            fontSize: '12.5px',
+                            fontWeight: 700,
+                            color: '#0f172a',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px'
+                          }}
                         >
-                          📁 Unggah Foto Berita
+                          <ImageIcon size={15} /> Unggah File Foto
                         </label>
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <small style={{ color: '#666', fontSize: '12px' }}>atau tempelkan URL Gambar Foto Berita:</small>
+                        <span style={{ color: '#64748b', fontSize: '12px' }}>atau masukkan Link URL Gambar:</span>
                         <input
                           type="url"
                           placeholder="https://domain.com/foto-berita.jpg"
@@ -1614,138 +2070,263 @@ export function BeritaPage({ onBack }: { onBack: () => void }) {
                           onChange={(e) => {
                             const val = e.target.value;
                             setNewPhotoUrl(val);
-                            if (val.trim()) {
-                              setNewPhotoPreview(val.trim());
-                            } else {
-                              setNewPhotoPreview('/assets/skata-hero-visual.png');
-                            }
+                            if (val.trim()) setNewPhotoPreview(val.trim());
+                            else setNewPhotoPreview('/assets/skata-hero-visual.png');
                           }}
-                          style={{ fontSize: '13px', padding: '8px 12px' }}
+                          style={{ fontSize: '13px', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', width: '100%' }}
                         />
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* 2. Judul Berita */}
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', fontWeight: 700, fontSize: '13.5px', marginBottom: '6px' }}>
-                    📝 Judul Berita
+                {/* 3. Judul Berita */}
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontWeight: 800, fontSize: '13.5px', color: '#0f172a', marginBottom: '8px' }}>
+                    📝 Judul Berita / Agenda
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="Masukkan judul berita atau artikel..."
+                    placeholder="Masukkan judul berita yang ringkas, padat, dan menarik..."
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
-                    style={{ width: '100%', padding: '10px 14px', fontSize: '14px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.15)' }}
+                    style={{ width: '100%', padding: '12px 16px', fontSize: '14.5px', borderRadius: '12px', border: '1px solid #cbd5e1', fontWeight: 600 }}
                   />
-                </div>
-
-                {/* 3. Kategori */}
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', fontWeight: 700, fontSize: '13.5px', marginBottom: '6px' }}>
-                    🏷️ Kategori Berita
-                  </label>
-                  <select
-                    value={newCategory}
-                    onChange={(e) => setNewCategory(e.target.value)}
-                    style={{ width: '100%', padding: '10px 14px', fontSize: '14px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.15)', background: '#fff' }}
-                  >
-                    <option value="Berita Utama">Berita Utama</option>
-                    <option value="Agenda">Agenda</option>
-                    <option value="Pengumuman">Pengumuman</option>
-                    <option value="Pendidikan">Pendidikan</option>
-                  </select>
                 </div>
 
                 {/* 4. Isi Berita */}
-                <div style={{ marginBottom: '20px' }}>
-                  <label style={{ display: 'block', fontWeight: 700, fontSize: '13.5px', marginBottom: '6px' }}>
-                    📰 Isi Berita
+                <div style={{ marginBottom: '24px' }}>
+                  <label style={{ display: 'block', fontWeight: 800, fontSize: '13.5px', color: '#0f172a', marginBottom: '8px' }}>
+                    📰 Isi Lengkap Berita
                   </label>
                   <textarea
                     required
-                    rows={6}
-                    placeholder="Tuliskan isi berita secara lengkap, rinci, dan informatif..."
+                    rows={7}
+                    placeholder="Tuliskan materi berita, susunan agenda rapat, atau pengumuman secara rinci..."
                     value={newBody}
                     onChange={(e) => setNewBody(e.target.value)}
-                    style={{ width: '100%', padding: '10px 14px', fontSize: '14px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.15)', lineHeight: '1.5' }}
+                    style={{ width: '100%', padding: '14px 16px', fontSize: '14px', borderRadius: '12px', border: '1px solid #cbd5e1', lineHeight: '1.6' }}
                   />
                 </div>
 
+                {/* Buttons Bar */}
                 <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', alignItems: 'center' }}>
-                  <button type="button" className="button outline" onClick={() => setIsWriting(false)}>
-                    Batal
-                  </button>
-                  <button type="submit" className="button primary">
-                    🚀 Terbitkan Berita
-                  </button>
-                </div>
-
-                {publishSuccess && (
-                  <div
+                  <button
+                    type="button"
+                    onClick={() => setIsWriting(false)}
                     style={{
-                      marginTop: '14px',
-                      padding: '10px 16px',
-                      background: '#dcfce7',
-                      color: '#15803d',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      fontWeight: 600,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
+                      background: '#f1f5f9',
+                      color: '#475569',
+                      border: 'none',
+                      padding: '12px 20px',
+                      borderRadius: '10px',
+                      fontWeight: 700,
+                      fontSize: '13.5px',
+                      cursor: 'pointer'
                     }}
                   >
-                    ✓ Berita berhasil diterbitkan!
-                  </div>
-                )}
+                    Batal
+                  </button>
+
+                  <button
+                    type="submit"
+                    style={{
+                      background: 'linear-gradient(135deg, #e51b23, #b91c1c)',
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '12px 24px',
+                      borderRadius: '10px',
+                      fontWeight: 800,
+                      fontSize: '13.5px',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      boxShadow: '0 4px 14px rgba(229, 27, 35, 0.4)'
+                    }}
+                  >
+                    {editingArticle ? (
+                      <><CheckCircle size={16} /> Simpan Perubahan</>
+                    ) : (
+                      <><Send size={16} /> Terbitkan Sekarang</>
+                    )}
+                  </button>
+                </div>
               </form>
             </div>
           </div>
         )}
 
-        {/* Modal Reading View */}
+        {/* Modal Reader Article View */}
         {readingArticle && (
           <div className="modal-backdrop" role="presentation" onMouseDown={() => setReadingArticle(null)}>
             <div
               className="login-modal"
-              style={{ width: 'min(720px, 95%)', textAlign: 'left' }}
+              style={{ width: 'min(780px, 95%)', textAlign: 'left', borderRadius: '24px', padding: 0, overflow: 'hidden' }}
               role="dialog"
               onMouseDown={(e) => e.stopPropagation()}
             >
-              <button className="modal-close" onClick={() => setReadingArticle(null)}>
-                ✕
-              </button>
-              <span className="news-card-cat-badge" style={{ display: 'inline-block', marginBottom: '12px' }}>
-                {readingArticle.category}
-              </span>
-              <h2 style={{ fontSize: '24px', lineHeight: '1.2', margin: '0 0 10px' }}>{readingArticle.title}</h2>
-              <p style={{ color: 'var(--red)', fontWeight: '800', fontSize: '13px', marginBottom: '20px' }}>
-                📅 {readingArticle.date} — Diterbitkan DPP SKATA GSD
-              </p>
-              
-              <div style={{ maxHeight: '350px', overflowY: 'auto', fontSize: '15px', lineHeight: '1.6', color: '#444' }}>
-                <p style={{ fontWeight: '700', marginBottom: '16px' }}>{readingArticle.excerpt}</p>
-                <p style={{ whitespace: 'pre-line' }}>{readingArticle.body}</p>
+              {/* Header Image Cover */}
+              <div style={{ position: 'relative', width: '100%', height: '280px', background: '#0f172a' }}>
+                <img
+                  src={readingArticle.image}
+                  alt={readingArticle.title}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  onError={(e) => { (e.target as HTMLImageElement).src = '/assets/skata-hero-visual.png'; }}
+                />
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(15,23,42,0.85) 100%)' }} />
+
+                <button
+                  className="modal-close"
+                  onClick={() => setReadingArticle(null)}
+                  style={{ color: '#fff', top: '16px', right: '16px', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)' }}
+                >
+                  ✕
+                </button>
+
+                <div style={{ position: 'absolute', bottom: '24px', left: '28px', right: '28px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                    <span style={{
+                      background: 'linear-gradient(135deg, #e51b23, #b91c1c)',
+                      color: '#fff',
+                      padding: '4px 12px',
+                      borderRadius: '16px',
+                      fontSize: '11.5px',
+                      fontWeight: 800,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px'
+                    }}>
+                      <Tag size={12} /> {readingArticle.category}
+                    </span>
+                    <span style={{ color: '#cbd5e1', fontSize: '12.5px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                      <Calendar size={13} /> {readingArticle.date} — DPP SKATA GSD
+                    </span>
+                  </div>
+
+                  <h2 style={{ fontSize: '22px', fontWeight: 900, color: '#ffffff', margin: 0, lineHeight: 1.3 }}>
+                    {readingArticle.title}
+                  </h2>
+                </div>
               </div>
 
-              <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid rgba(0,0,0,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              {/* Reader Body Text */}
+              <div style={{ padding: '28px 32px', maxHeight: 'min(520px, 62vh)', overflowY: 'auto' }}>
+                {readingArticle.excerpt && (
+                  <div style={{
+                    fontSize: '15.5px',
+                    fontWeight: 700,
+                    color: '#0f172a',
+                    lineHeight: 1.65,
+                    marginBottom: '24px',
+                    borderLeft: '4px solid #e51b23',
+                    background: 'linear-gradient(90deg, #f8fafc 0%, #ffffff 100%)',
+                    padding: '14px 18px',
+                    borderRadius: '0 12px 12px 0',
+                    boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.02)'
+                  }}>
+                    {readingArticle.excerpt}
+                  </div>
+                )}
+
+                <div style={{ fontSize: '15px', color: '#1e293b' }}>
+                  {readingArticle.body ? (
+                    readingArticle.body
+                      .split(/\n\s*\n/)
+                      .map((paragraph: string, idx: number) => {
+                        const trimmed = paragraph.trim();
+                        if (!trimmed) return null;
+                        return (
+                          <p
+                            key={idx}
+                            style={{
+                              fontSize: '15px',
+                              lineHeight: '1.85',
+                              color: '#334155',
+                              marginBottom: '20px',
+                              whiteSpace: 'pre-line',
+                              letterSpacing: '-0.005em'
+                            }}
+                          >
+                            {trimmed}
+                          </p>
+                        );
+                      })
+                  ) : (
+                    <p style={{ color: '#64748b', fontStyle: 'italic' }}>Tidak ada isi berita.</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Reader Action Footer */}
+              <div style={{ padding: '18px 28px', background: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                {isSuperAdmin ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <button
+                      onClick={() => {
+                        const target = readingArticle;
+                        setReadingArticle(null);
+                        handleStartEdit(target);
+                      }}
+                      style={{
+                        background: '#eff6ff',
+                        color: '#1d4ed8',
+                        border: '1px solid #bfdbfe',
+                        padding: '8px 16px',
+                        borderRadius: '8px',
+                        fontSize: '12.5px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <Pencil size={14} /> Edit Berita Ini
+                    </button>
+
+                    <button
+                      onClick={() => handleDeleteNews(readingArticle.id)}
+                      style={{
+                        background: '#fef2f2',
+                        color: '#dc2626',
+                        border: '1px solid #fca5a5',
+                        padding: '8px 16px',
+                        borderRadius: '8px',
+                        fontSize: '12.5px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <Trash2 size={14} /> Hapus Berita
+                    </button>
+                  </div>
+                ) : <div />}
+
                 <button
-                  className="button outline"
-                  style={{ color: '#dc2626', borderColor: '#fca5a5', fontSize: '13px' }}
-                  onClick={() => handleDeleteNews(readingArticle.id)}
+                  onClick={() => setReadingArticle(null)}
+                  style={{
+                    background: 'linear-gradient(135deg, #0f172a, #334155)',
+                    color: '#ffffff',
+                    border: 'none',
+                    padding: '10px 22px',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    fontWeight: 800,
+                    cursor: 'pointer'
+                  }}
                 >
-                  🗑️ Hapus Berita Ini
-                </button>
-                <button className="button primary" style={{ fontSize: '13px' }} onClick={() => setReadingArticle(null)}>
                   Tutup
                 </button>
               </div>
             </div>
           </div>
         )}
+
       </div>
     </SubPageLayout>
   );

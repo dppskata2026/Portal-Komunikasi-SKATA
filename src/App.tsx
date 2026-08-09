@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { subscribeNewsArticles, subscribeMemberships, safeSetLocalStorage } from './lib/firestoreService';
 import { deduplicateMembers } from './components/TotalAnggotaTable';
 import {
@@ -12,7 +12,9 @@ import {
   Landmark,
   Menu,
   Moon,
+  Newspaper,
   PenSquare,
+  Quote,
   Search,
   Send,
   ShieldCheck,
@@ -582,7 +584,47 @@ function ExecutiveDashboard({ navigate }: { navigate: (path: string) => void }) 
   );
 }
 
+function getCategoryBadgeStyle(category?: string) {
+  const cat = (category || '').toLowerCase();
+  if (cat.includes('utama') || cat.includes('headline')) {
+    return {
+      bg: 'linear-gradient(135deg, #e51b23 0%, #dc2626 100%)',
+      color: '#ffffff',
+      shadow: '0 4px 12px rgba(229, 27, 35, 0.4)',
+      border: 'rgba(255,255,255,0.3)'
+    };
+  } else if (cat.includes('agenda') || cat.includes('kegiatan')) {
+    return {
+      bg: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+      color: '#ffffff',
+      shadow: '0 4px 12px rgba(37, 99, 235, 0.4)',
+      border: 'rgba(255,255,255,0.3)'
+    };
+  } else if (cat.includes('organisasi') || cat.includes('serikat')) {
+    return {
+      bg: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+      color: '#ffffff',
+      shadow: '0 4px 12px rgba(5, 150, 105, 0.4)',
+      border: 'rgba(255,255,255,0.3)'
+    };
+  } else if (cat.includes('pengumuman') || cat.includes('info')) {
+    return {
+      bg: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)',
+      color: '#ffffff',
+      shadow: '0 4px 12px rgba(217, 119, 6, 0.4)',
+      border: 'rgba(255,255,255,0.3)'
+    };
+  }
+  return {
+    bg: 'linear-gradient(135deg, #e51b23 0%, #b91c1c 100%)',
+    color: '#ffffff',
+    shadow: '0 4px 12px rgba(229, 27, 35, 0.35)',
+    border: 'rgba(255,255,255,0.25)'
+  };
+}
+
 function SorotanSKATA({ navigate }: { navigate: (path: string) => void }) {
+  const { isSuperAdmin } = useAuth();
   const [articles, setArticles] = useState<any[]>(() => {
     try {
       const stored = localStorage.getItem('skata_news_articles');
@@ -608,113 +650,377 @@ function SorotanSKATA({ navigate }: { navigate: (path: string) => void }) {
   const sideArticles = articles.slice(1, 4);
 
   return (
-    <section className="sorotan-section container">
-      <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '12px' }}>
+    <section className="sorotan-section container" style={{ margin: '40px auto 48px' }}>
+      <div
+        className="section-header"
+        style={{
+          display: 'flex',
+          justify: 'space-between',
+          alignItems: 'flex-end',
+          flexWrap: 'wrap',
+          gap: '16px',
+          marginBottom: '28px'
+        }}
+      >
         <div>
-          <h2 className="section-title" style={{ paddingTop: '14px' }}>SOROTAN SKATA</h2>
-          <p className="section-subtitle">Informasi, agenda, dan perkembangan terbaru Serikat Karyawan GSD.</p>
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '4px 12px',
+              borderRadius: '20px',
+              background: 'rgba(229, 27, 35, 0.08)',
+              border: '1px solid rgba(229, 27, 35, 0.2)',
+              fontSize: '11px',
+              fontWeight: 800,
+              color: '#e51b23',
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              marginBottom: '8px'
+            }}
+          >
+            <span
+              style={{
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                background: '#e51b23',
+                boxShadow: '0 0 8px #e51b23'
+              }}
+            />
+            KABAR & AGENDA SERIKAT
+          </div>
+          <h2 className="section-title" style={{ paddingTop: '2px', fontSize: '28px', fontWeight: 900, margin: 0 }}>
+            SOROTAN SKATA
+          </h2>
+          <p className="section-subtitle" style={{ margin: '6px 0 0', fontSize: '14.5px', color: '#64748b' }}>
+            Informasi, agenda, dan perkembangan terbaru Serikat Karyawan GSD.
+          </p>
         </div>
         <button
           className="button outline"
           onClick={() => navigate('/berita')}
-          style={{ fontSize: '13px', padding: '6px 14px' }}
+          style={{
+            fontSize: '13px',
+            fontWeight: 750,
+            padding: '8px 18px',
+            borderRadius: '30px',
+            border: '1.5px solid #e51b23',
+            color: '#e51b23',
+            background: 'transparent',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease'
+          }}
         >
-          Lihat Semua Berita →
+          Lihat Semua Berita <ChevronRight size={15} />
         </button>
       </div>
 
       {articles.length === 0 ? (
-        <div style={{
-          padding: '44px 24px',
-          textAlign: 'center',
-          background: 'linear-gradient(145deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))',
-          border: '1px dashed rgba(255,255,255,0.15)',
-          borderRadius: '20px',
-          margin: '16px 0 24px'
-        }}>
-          <div style={{ fontSize: '32px', marginBottom: '8px' }}>📰</div>
-          <h3 style={{ fontSize: '18px', fontWeight: 700, margin: '0 0 6px', color: '#fff' }}>Belum Ada Berita Terpublikasi</h3>
-          <p style={{ fontSize: '13.5px', color: 'rgba(255,255,255,0.7)', margin: '0 0 18px', maxWidth: '540px', marginLeft: 'auto', marginRight: 'auto' }}>
-            Seluruh berita, kabar, dan agenda yang ditulis dan diterbitkan melalui Laman Berita akan otomatis ditampilkan sebagai sorotan utama di sini.
+        <div
+          style={{
+            padding: '44px 24px',
+            textAlign: 'center',
+            background: 'linear-gradient(145deg, rgba(229,27,35,0.03), rgba(0,0,0,0.01))',
+            border: '1px dashed rgba(229,27,35,0.25)',
+            borderRadius: '24px',
+            margin: '16px 0 24px'
+          }}
+        >
+          <div style={{ fontSize: '36px', marginBottom: '8px' }}>📰</div>
+          <h3 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 6px', color: 'var(--text-main, #0f172a)' }}>
+            Belum Ada Berita Terpublikasi
+          </h3>
+          <p
+            style={{
+              fontSize: '14px',
+              color: '#64748b',
+              margin: '0 0 18px',
+              maxWidth: '540px',
+              marginLeft: 'auto',
+              marginRight: 'auto'
+            }}
+          >
+            Seluruh berita, kabar, dan agenda yang ditulis dan diterbitkan melalui Laman Berita akan otomatis
+            ditampilkan sebagai sorotan utama di sini.
           </p>
           <button
             className="button primary"
             onClick={() => navigate('/berita')}
-            style={{ fontSize: '13.5px', padding: '8px 20px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+            style={{
+              fontSize: '13.5px',
+              padding: '10px 22px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              borderRadius: '30px',
+              background: 'linear-gradient(135deg, #e51b23 0%, #c1121f 100%)',
+              color: '#ffffff',
+              fontWeight: 700,
+              boxShadow: '0 6px 18px rgba(229,27,35,0.3)',
+              border: 'none',
+              cursor: 'pointer'
+            }}
           >
-            <PenSquare size={16} /> Tulis Berita Baru di Laman Berita
+            {isSuperAdmin ? (
+              <>
+                <PenSquare size={16} /> Tulis Berita Baru di Laman Berita
+              </>
+            ) : (
+              <>
+                <Newspaper size={16} /> Lihat Semua Berita di Laman Berita
+              </>
+            )}
           </button>
         </div>
       ) : (
         <div className="sorotan-grid">
           {/* Left Featured Article */}
           {featured && (
-            <div className="sorotan-left" style={sideArticles.length === 0 ? { gridColumn: 'span 12', maxWidth: '880px', margin: '0 auto', width: '100%' } : undefined}>
-              <div className="featured-img-shell">
-                <img
-                  src={featured.image || '/assets/skata-hero-visual.png'}
-                  alt={featured.title}
-                  loading="lazy"
-                  onError={(e) => { (e.target as HTMLImageElement).src = '/assets/skata-hero-visual.png'; }}
-                />
-                <div className="image-overlay" />
-                <span className="category-badge">{featured.category || 'Berita Utama'}</span>
-              </div>
-              <div className="featured-content">
-                <time className="article-date">
-                  <CalendarDays
-                    size={13}
-                    style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }}
-                  />{' '}
-                  {featured.date}
-                </time>
-                <h3>{featured.title}</h3>
-                <p>{featured.excerpt || featured.body}</p>
-                <a
-                  href={`/berita?id=${featured.id}`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    navigate(`/berita?id=${featured.id}`);
-                  }}
-                  className="read-more-btn"
-                  style={{ paddingBottom: '0px', paddingTop: '5px', marginTop: '0px', marginBottom: '0px' }}
-                >
-                  Baca Selengkapnya <ChevronRight size={16} />
-                </a>
+            <div
+              className="sorotan-left"
+              style={
+                sideArticles.length === 0
+                  ? { gridColumn: 'span 12', maxWidth: '880px', margin: '0 auto', width: '100%' }
+                  : undefined
+              }
+            >
+              <div className="editorial-featured-card-vibrant" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ position: 'relative', width: '100%', height: '340px', overflow: 'hidden' }}>
+                  <img
+                    src={featured.image || '/assets/skata-hero-visual.png'}
+                    alt={featured.title}
+                    className="featured-img-zoom"
+                    loading="lazy"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      transition: 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
+                    }}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/assets/skata-hero-visual.png';
+                    }}
+                  />
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: 'linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.7) 100%)',
+                      pointerEvents: 'none'
+                    }}
+                  />
+                  {/* Category Pill */}
+                  {(() => {
+                    const b = getCategoryBadgeStyle(featured.category);
+                    return (
+                      <span
+                        style={{
+                          position: 'absolute',
+                          top: '18px',
+                          left: '18px',
+                          background: b.bg,
+                          color: b.color,
+                          padding: '6px 16px',
+                          fontSize: '12px',
+                          fontWeight: 800,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.06em',
+                          borderRadius: '30px',
+                          boxShadow: b.shadow,
+                          border: `1px solid ${b.border}`
+                        }}
+                      >
+                        {featured.category || 'Berita Utama'}
+                      </span>
+                    );
+                  })()}
+                  {/* Top Right Beacon Badge */}
+                  <span
+                    style={{
+                      position: 'absolute',
+                      top: '18px',
+                      right: '18px',
+                      background: 'rgba(15, 23, 42, 0.75)',
+                      backdropFilter: 'blur(8px)',
+                      color: '#ffffff',
+                      padding: '5px 12px',
+                      fontSize: '11px',
+                      fontWeight: 800,
+                      borderRadius: '20px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      border: '1px solid rgba(255,255,255,0.2)'
+                    }}
+                  >
+                    <Sparkles size={12} color="#f59e0b" /> SOROTAN UTAMA
+                  </span>
+                </div>
+
+                <div style={{ padding: '28px', display: 'flex', flexDirection: 'column', flex: 1, gap: '12px' }}>
+                  <time
+                    style={{
+                      fontSize: '13px',
+                      color: '#e51b23',
+                      fontWeight: 750,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <CalendarDays size={14} /> {featured.date || 'Terkini'} — DPP SKATA GSD
+                  </time>
+                  <h3
+                    style={{
+                      fontSize: '22px',
+                      fontWeight: 850,
+                      lineHeight: '1.35',
+                      margin: 0,
+                      color: 'var(--text-main, #0f172a)'
+                    }}
+                  >
+                    {featured.title}
+                  </h3>
+                  <p
+                    style={{
+                      fontSize: '14.5px',
+                      lineHeight: '1.65',
+                      color: '#475569',
+                      margin: 0,
+                      flex: 1,
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    {featured.excerpt || featured.body}
+                  </p>
+                  <div style={{ paddingTop: '8px' }}>
+                    <a
+                      href={`/berita?id=${featured.id}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        navigate(`/berita?id=${featured.id}`);
+                      }}
+                      className="read-more-btn-pill"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '10px 22px',
+                        background: 'linear-gradient(135deg, #e51b23 0%, #c1121f 100%)',
+                        color: '#ffffff',
+                        fontWeight: 800,
+                        fontSize: '13.5px',
+                        borderRadius: '50px',
+                        boxShadow: '0 6px 18px rgba(229, 27, 35, 0.3)',
+                        textDecoration: 'none',
+                        transition: 'all 0.25s ease'
+                      }}
+                    >
+                      Baca Selengkapnya <ChevronRight size={16} />
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
-          {/* Right Articles List */}
+          {/* Right Side Articles */}
           {sideArticles.length > 0 && (
-            <div className="sorotan-right">
-              {sideArticles.map((item, index) => (
-                <a
-                  key={`side-art-${item.id || index}-${index}`}
-                  href={`/berita?id=${item.id}`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    navigate(`/berita?id=${item.id}`);
-                  }}
-                  className="editorial-small-card"
-                >
-                  <div className="small-img-shell">
-                    <img
-                      src={item.image || '/assets/skata-hero-visual.png'}
-                      alt={item.title}
-                      loading="lazy"
-                      onError={(e) => { (e.target as HTMLImageElement).src = '/assets/skata-hero-visual.png'; }}
-                    />
-                  </div>
-                  <div className="small-content">
-                    <div className="small-meta">
-                      <span className="small-badge">{item.category || 'Berita'}</span>
-                      <time className="small-date">{item.date}</time>
+            <div className="sorotan-right" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {sideArticles.map((item, index) => {
+                const bStyle = getCategoryBadgeStyle(item.category);
+                return (
+                  <a
+                    key={`side-art-${item.id || index}-${index}`}
+                    href={`/berita?id=${item.id}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      navigate(`/berita?id=${item.id}`);
+                    }}
+                    className="editorial-small-card-vibrant"
+                    style={{
+                      display: 'flex',
+                      gap: '16px',
+                      alignItems: 'center',
+                      textDecoration: 'none'
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: '110px',
+                        height: '92px',
+                        borderRadius: '14px',
+                        overflow: 'hidden',
+                        flexShrink: 0,
+                        position: 'relative',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
+                      }}
+                    >
+                      <img
+                        src={item.image || '/assets/skata-hero-visual.png'}
+                        alt={item.title}
+                        className="small-card-img-zoom"
+                        loading="lazy"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          transition: 'transform 0.3s ease'
+                        }}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '/assets/skata-hero-visual.png';
+                        }}
+                      />
                     </div>
-                    <h4>{item.title}</h4>
-                  </div>
-                </a>
-              ))}
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        <span
+                          style={{
+                            padding: '3px 10px',
+                            borderRadius: '20px',
+                            fontSize: '11px',
+                            fontWeight: 800,
+                            background: bStyle.bg,
+                            color: '#ffffff',
+                            letterSpacing: '0.03em'
+                          }}
+                        >
+                          {item.category || 'Berita'}
+                        </span>
+                        <time style={{ fontSize: '12px', color: '#64748b', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          <CalendarDays size={12} /> {item.date}
+                        </time>
+                      </div>
+                      <h4
+                        style={{
+                          fontSize: '15px',
+                          fontWeight: 800,
+                          color: 'var(--text-main, #0f172a)',
+                          lineHeight: '1.4',
+                          margin: 0,
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden'
+                        }}
+                      >
+                        {item.title}
+                      </h4>
+                    </div>
+                    <div className="arrow-hover-indicator" style={{ color: '#94a3b8', transition: 'transform 0.2s ease, color 0.2s ease' }}>
+                      <ChevronRight size={18} />
+                    </div>
+                  </a>
+                );
+              })}
             </div>
           )}
         </div>
@@ -724,17 +1030,223 @@ function SorotanSKATA({ navigate }: { navigate: (path: string) => void }) {
 }
 
 function InspirasiBanner() {
+  const quoteText =
+    'Kesejahteraan bukanlah hadiah dari belas kasihan, melainkan hasil perjuangan kolektif yang terorganisir dengan profesionalisme dan integritas.';
+  const authorText = 'Dewan Pengurus Pusat SKATA';
+
+  const runningItems = [
+    'Kesejahteraan bukanlah hadiah dari belas kasihan, melainkan hasil perjuangan kolektif yang terorganisir dengan profesionalisme dan integritas.',
+    'SOLIDARITAS • INTEGRITAS • KESEJAHTERAAN • PROFESIONALISME',
+    'SERIKAT KARYAWAN PT GRAHA SARANA DUTA (SKATA) PERIODE 2026–2028'
+  ];
+
   return (
-    <section className="inspirasi-section container">
-      <div className="inspirasi-banner">
-        <div className="banner-bg-grid" aria-hidden="true" />
-        <div className="inspirasi-content">
-          <span className="inspirasi-eyebrow">INSPIRASI & PERJUANGAN</span>
-          <p className="inspirasi-quote">
-            "Kesejahteraan bukanlah hadiah dari belas kasihan, melainkan hasil perjuangan kolektif yang terorganisir
-            dengan profesionalisme dan integritas."
+    <section className="inspirasi-section container" style={{ margin: '40px auto 52px' }}>
+      <div
+        style={{
+          position: 'relative',
+          borderRadius: '24px',
+          overflow: 'hidden',
+          background: 'linear-gradient(145deg, #0b0f19 0%, #151d2a 50%, #080b12 100%)',
+          border: '1px solid rgba(229, 27, 35, 0.3)',
+          boxShadow: '0 20px 45px -15px rgba(229, 27, 35, 0.25), 0 10px 30px rgba(0, 0, 0, 0.35)',
+          padding: '36px 32px 28px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '24px'
+        }}
+      >
+        {/* Top glowing accent border line */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '4px',
+            background: 'linear-gradient(90deg, #e51b23 0%, #f59e0b 50%, #e51b23 100%)',
+            zIndex: 10
+          }}
+        />
+
+        {/* Background Decorative Large Watermark Quote Icon */}
+        <div
+          style={{
+            position: 'absolute',
+            right: '24px',
+            bottom: '16px',
+            opacity: 0.05,
+            pointerEvents: 'none',
+            color: '#e51b23'
+          }}
+        >
+          <Quote size={180} />
+        </div>
+
+        {/* Top Header Badge */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '6px 18px',
+              borderRadius: '30px',
+              background: 'linear-gradient(135deg, rgba(229, 27, 35, 0.25) 0%, rgba(185, 28, 28, 0.15) 100%)',
+              border: '1px solid rgba(229, 27, 35, 0.4)',
+              color: '#ffffff',
+              fontSize: '12px',
+              fontWeight: 800,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              boxShadow: '0 4px 12px rgba(229, 27, 35, 0.2)'
+            }}
+          >
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '22px',
+                height: '22px',
+                borderRadius: '50%',
+                background: '#e51b23',
+                color: '#ffffff'
+              }}
+            >
+              <Quote size={12} />
+            </span>
+            INSPIRASI & PERJUANGAN
+          </div>
+
+          <span
+            style={{
+              fontSize: '12px',
+              color: '#f59e0b',
+              background: 'rgba(245, 158, 11, 0.1)',
+              border: '1px solid rgba(245, 158, 11, 0.25)',
+              padding: '4px 14px',
+              borderRadius: '20px',
+              fontWeight: 700,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <Sparkles size={13} color="#f59e0b" /> PESAN DPP SKATA
+          </span>
+        </div>
+
+        {/* Main Quote Content (Substantial Vertical Space) */}
+        <div style={{ position: 'relative', zIndex: 2, padding: '8px 4px' }}>
+          <p
+            style={{
+              fontSize: '21px',
+              fontWeight: 700,
+              lineHeight: '1.6',
+              color: '#f8fafc',
+              fontStyle: 'italic',
+              fontFamily: 'Georgia, serif',
+              margin: '0 0 16px',
+              maxWidth: '960px'
+            }}
+          >
+            "{quoteText}"
           </p>
-          <cite className="inspirasi-author">— Dewan Pengurus Pusat SKATA</cite>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ width: '32px', height: '2px', background: '#e51b23' }} />
+            <cite
+              style={{
+                fontSize: '14px',
+                fontWeight: 800,
+                color: '#f59e0b',
+                fontStyle: 'normal',
+                letterSpacing: '0.04em'
+              }}
+            >
+              — {authorText}
+            </cite>
+          </div>
+        </div>
+
+        {/* Bottom Running Text Marquee Strip */}
+        <div
+          className="marquee-container"
+          style={{
+            position: 'relative',
+            zIndex: 2,
+            marginTop: '8px',
+            background: 'rgba(15, 23, 42, 0.65)',
+            borderRadius: '14px',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            overflow: 'hidden',
+            padding: '12px 0',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          {/* Edge gradient masks */}
+          <div
+            style={{
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: '32px',
+              background: 'linear-gradient(to right, #0b0f19, transparent)',
+              zIndex: 4,
+              pointerEvents: 'none'
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              right: 0,
+              top: 0,
+              bottom: 0,
+              width: '32px',
+              background: 'linear-gradient(to left, #0b0f19, transparent)',
+              zIndex: 4,
+              pointerEvents: 'none'
+            }}
+          />
+
+          <div
+            className="marquee-track"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              animation: 'marqueeScroll 32s linear infinite',
+              gap: '0'
+            }}
+          >
+            {[1, 2, 3].map((loopIdx) => (
+              <div
+                key={`marquee-loop-${loopIdx}`}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '24px',
+                  paddingRight: '48px'
+                }}
+              >
+                {runningItems.map((item, itemIdx) => (
+                  <React.Fragment key={`mitem-${loopIdx}-${itemIdx}`}>
+                    <span style={{ color: '#e51b23', fontSize: '14px', fontWeight: 'bold' }}>✦</span>
+                    <span
+                      style={{
+                        fontSize: '13.5px',
+                        fontWeight: 600,
+                        color: 'rgba(255, 255, 255, 0.9)',
+                        letterSpacing: '0.02em'
+                      }}
+                    >
+                      {item}
+                    </span>
+                  </React.Fragment>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -925,11 +1437,11 @@ export default function App() {
   const [loginOpen, setLoginOpen] = useState(false);
   const { user, isLoggedIn } = useAuth();
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [currentPath, setCurrentPath] = useState(() => window.location.pathname);
+  const [currentPath, setCurrentPath] = useState(() => window.location.pathname + window.location.search);
 
   useEffect(() => {
     const handlePopState = () => {
-      setCurrentPath(window.location.pathname);
+      setCurrentPath(window.location.pathname + window.location.search);
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
@@ -979,7 +1491,8 @@ export default function App() {
 
   // Routing Switch
   const renderContent = () => {
-    const path = currentPath.toLowerCase();
+    const fullPath = currentPath.toLowerCase();
+    const path = fullPath.split('?')[0];
 
 
     // Beranda

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ArrowLeft, FileText, Search, Download, ShieldAlert, Eye } from 'lucide-react';
 import { PkbViewerModal } from './PkbViewerModal';
+import { openTemplatePrintWindow, downloadTemplateFile } from '../lib/pdfTemplateGenerator';
 
 interface DokumenPageProps {
   onBack: () => void;
@@ -17,6 +18,7 @@ interface DocumentItem {
   version: string;
   uploadDate: string | null;
   isPkb?: boolean;
+  docTemplateId?: 'formulir-pendaftaran' | 'surat-kuasa-iuran';
 }
 
 const documentsData: DocumentItem[] = [
@@ -31,6 +33,30 @@ const documentsData: DocumentItem[] = [
     version: "PKB V Resmi 2025-2027",
     uploadDate: "2026-01-02",
     isPkb: true
+  },
+  {
+    title: "FORMULIR PENDAFTARAN SKATA_V1_2026",
+    category: "Formulir",
+    docNumber: "FORM-REG-01/2026",
+    effectiveDate: "2026-01-01",
+    period: "2026",
+    accessLevel: "Publik",
+    file: "FORMULIR_PENDAFTARAN_SKATA_V1_2026",
+    version: "V1.0 (2026)",
+    uploadDate: "2026-01-10",
+    docTemplateId: "formulir-pendaftaran"
+  },
+  {
+    title: "Form Surat Kuasa iuran SKATA V.1 2026",
+    category: "Formulir",
+    docNumber: "FORM-AUTH-02/2026",
+    effectiveDate: "2026-01-01",
+    period: "2026",
+    accessLevel: "Publik",
+    file: "Form_Surat_Kuasa_iuran_SKATA_V.1_2026",
+    version: "V1.0 (2026)",
+    uploadDate: "2026-01-10",
+    docTemplateId: "surat-kuasa-iuran"
   },
   {
     title: "Anggaran Dasar (AD) SKATA GSD",
@@ -53,17 +79,6 @@ const documentsData: DocumentItem[] = [
     file: null,
     version: "v2.0",
     uploadDate: null
-  },
-  {
-    title: "Formulir Pendaftaran Manual Anggota",
-    category: "Formulir",
-    docNumber: "FORM-REG-01/2026",
-    effectiveDate: "2026-01-01",
-    period: "2026",
-    accessLevel: "Publik",
-    file: "Formulir_Pendaftaran_SKATA.pdf",
-    version: "v1.0",
-    uploadDate: "2026-01-10"
   },
   {
     title: "Panduan Klaim Kesejahteraan & Santunan Duka",
@@ -217,7 +232,9 @@ export function DokumenPage({ onBack }: DokumenPageProps) {
                   <>
                     <button
                       onClick={() => {
-                        if (doc.isPkb) {
+                        if (doc.docTemplateId) {
+                          openTemplatePrintWindow(doc.docTemplateId);
+                        } else if (doc.isPkb) {
                           setIsViewerOpen(true);
                         } else {
                           window.open(`/assets/${doc.file}`, '_blank');
@@ -228,14 +245,24 @@ export function DokumenPage({ onBack }: DokumenPageProps) {
                     >
                       <Eye size={15} /> Lihat Dokumen
                     </button>
-                    <a
-                      href={`/assets/${doc.file}`}
-                      download={doc.file}
-                      className="button primary"
-                      style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', textDecoration: 'none', fontSize: '13px' }}
-                    >
-                      <Download size={15} /> Unduh Berkas
-                    </a>
+                    {doc.docTemplateId ? (
+                      <button
+                        onClick={() => downloadTemplateFile(doc.docTemplateId!)}
+                        className="button primary"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}
+                      >
+                        <Download size={15} /> Unduh Template
+                      </button>
+                    ) : (
+                      <a
+                        href={`/assets/${doc.file}`}
+                        download={doc.file}
+                        className="button primary"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', textDecoration: 'none', fontSize: '13px' }}
+                      >
+                        <Download size={15} /> Unduh Berkas
+                      </a>
+                    )}
                   </>
                 ) : (
                   <div style={{

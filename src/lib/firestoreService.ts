@@ -3,6 +3,7 @@ import {
   doc,
   setDoc,
   addDoc,
+  updateDoc,
   deleteDoc,
   getDocs,
   onSnapshot,
@@ -86,18 +87,109 @@ export function safeSetLocalStorage(key: string, value: any): void {
 }
 
 // ---------------- NEWS ARTICLES ----------------
+const DEFAULT_INITIAL_NEWS: Omit<NewsArticle, 'id'>[] = [
+  {
+    category: 'Berita Utama',
+    title: 'Peluncuran Portal SKATA Digital 2026 versi Terintegrasi & Modern',
+    excerpt: 'Dewan Pengurus Pusat Serikat Karyawan PT Grahasentra Santosa (SKATA GSD) secara resmi meluncurkan pembaruan sistem portal terintegrasi untuk mendukung keterbukaan informasi dan pelayanan anggota.',
+    body: `Dewan Pengurus Pusat Serikat Karyawan PT Grahasentra Santosa (SKATA GSD) secara resmi meluncurkan pembaruan sistem portal terintegrasi untuk mendukung keterbukaan informasi dan pelayanan anggota.
+
+Melalui portal ini, seluruh anggota dan pengurus dapat mengakses informasi terkini mengenai AD/ART, Perjanjian Kerja Bersama (PKB V), direktori keanggotaan digital, konsultasi ketenagakerjaan berbasis AI (Sahabat SKATA), hingga penyampaian aspirasi secara terpusat.
+
+Ketua Umum DPP SKATA GSD menyampaikan bahwa transformasi digital ini bertujuan untuk mempererat silaturahmi antaranggota lintas DPW di seluruh Indonesia sekaligus mewujudkan tata kelola organisasi yang transparan, akuntabel, dan efisien.`,
+    date: '09 Agustus 2026',
+    image: '/assets/skata-hero-visual.png',
+    createdAt: new Date(Date.now() - 3600000 * 24 * 3).toISOString()
+  },
+  {
+    category: 'Agenda',
+    title: 'Rapat Anggota Tahunan & Silaturahmi Nasional SKATA GSD 2026',
+    excerpt: 'Undangan Rapat Anggota Tahunan dan Konsolidasi Pengurus DPP & DPW SKATA seluruh Indonesia.',
+    body: `DPP SKATA GSD mengundang seluruh perwakilan DPW dan anggota aktif untuk menghadiri Rapat Anggota Tahunan (RAT) & Silaturahmi Nasional 2026.
+
+Agenda utama RAT kali ini meliputi:
+1. Laporan Pertanggungjawaban Pengurus DPP SKATA GSD Tahun 2025/2026.
+2. Evaluasi pelaksanaan Perjanjian Kerja Bersama (PKB V).
+3. Pembahasan program kerja strategis Kesejahteraan & Pengembangan Anggota Tahun 2026/2027.
+4. Konsolidasi organisasi dan penguatan solidaritas antarwilayah.
+
+Jadwal pelaksanaan: Sabtu, 15 Agustus 2026 pukul 09.00 WIB. Tautan pendaftaran dan konfirmasi kehadiran dapat diakses melalui sekretariat DPW masing-masing.`,
+    date: '15 Agustus 2026',
+    image: '/assets/skata-hero-visual.png',
+    createdAt: new Date(Date.now() - 3600000 * 24 * 2).toISOString()
+  },
+  {
+    category: 'Pengumuman',
+    title: 'Pengumuman Resmi: Pemutakhiran Database e-KTA Karyawan GSD',
+    excerpt: 'Himbauan bagi seluruh anggota aktif SKATA untuk memperbarui biodata dan verifikasi e-KTA melalui Portal Digital.',
+    body: `Dalam rangka penataan tertib administrasi keanggotaan nasional, DPP SKATA GSD menghimbau seluruh anggota aktif untuk melakukan pemutakhiran data pribadi dan nomor e-KTA.
+
+Proses verifikasi data dilakukan secara mandiri melalui menu 'Daftar Anggota' pada Portal SKATA Digital. Data yang diperbarui akan menjadi acuan resmi distribusi fasilitas dan hak keanggotaan serikat.
+
+Batas waktu pemutakhiran data adalah tanggal 31 Agustus 2026. Bagi anggota yang mengalami kendala teknis dapat menghubungi tim sekretariat melalui menu Kontak.`,
+    date: '05 Agustus 2026',
+    image: '/assets/skata-hero-visual.png',
+    createdAt: new Date(Date.now() - 3600000 * 24 * 5).toISOString()
+  },
+  {
+    category: 'Pendidikan',
+    title: 'Workshop Pelatihan Hubungan Industrial & Pemahaman PKB V SKATA',
+    excerpt: 'Program edukasi dan bimbingan teknis pemahaman Perjanjian Kerja Bersama (PKB V) bagi pengurus wilayah dan anggota.',
+    body: `Bidang Pendidikan dan Advokasi DPP SKATA GSD menyelenggarakan Workshop Pelatihan Hubungan Industrial & Pemahaman PKB V bagi perwakilan pengurus dan anggota.
+
+Materi pelatihan meliputi pemahaman hak dan kewajiban pekerja, mekanisme penyelesaian perselisihan hubungan industrial, penafsiran pasal-pasal kunci dalam PKB V, serta teknik advokasi keanggotaan.
+
+Pelatihan diselenggarakan secara interaktif dengan narasumber pakar hukum ketenagakerjaan dan jajaran Pengurus Pusat SKATA.`,
+    date: '01 Agustus 2026',
+    image: '/assets/skata-hero-visual.png',
+    createdAt: new Date(Date.now() - 3600000 * 24 * 8).toISOString()
+  }
+];
+
+let hasSeededNews = false;
+
+async function seedInitialNewsArticles() {
+  if (hasSeededNews) return;
+  hasSeededNews = true;
+  try {
+    for (const item of DEFAULT_INITIAL_NEWS) {
+      await addDoc(collection(db, NEWS_COLLECTION), item);
+    }
+  } catch (e) {
+    console.warn("Failed to seed initial news articles:", e);
+  }
+}
+
+function parseArticleTimestamp(article: NewsArticle): number {
+  if (article.createdAt) {
+    const t = new Date(article.createdAt).getTime();
+    if (!isNaN(t)) return t;
+  }
+  if (article.date) {
+    const t = new Date(article.date).getTime();
+    if (!isNaN(t)) return t;
+  }
+  return 0;
+}
+
 export function subscribeNewsArticles(callback: (articles: NewsArticle[]) => void) {
   try {
     const q = query(collection(db, NEWS_COLLECTION));
     return onSnapshot(
       q,
-      (snapshot) => {
+      async (snapshot) => {
+        if (snapshot.empty) {
+          await seedInitialNewsArticles();
+          return;
+        }
+
         const articles: NewsArticle[] = [];
         snapshot.forEach((docSnap) => {
           articles.push({ id: docSnap.id, ...docSnap.data() } as NewsArticle);
         });
-        // Sort descending
-        articles.sort((a, b) => (b.createdAt || b.date || '').localeCompare(a.createdAt || a.date || ''));
+        // Sort descending by numeric timestamp (newest first)
+        articles.sort((a, b) => parseArticleTimestamp(b) - parseArticleTimestamp(a));
+        safeSetLocalStorage('skata_news_articles', articles);
         callback(articles);
       },
       (error) => {
@@ -116,6 +208,10 @@ export async function addNewsArticleFirebase(article: Omit<NewsArticle, 'id'>): 
     createdAt: article.createdAt || new Date().toISOString()
   });
   return newDoc.id;
+}
+
+export async function updateNewsArticleFirebase(id: string, article: Partial<NewsArticle>): Promise<void> {
+  await updateDoc(doc(db, NEWS_COLLECTION, id), article);
 }
 
 export async function deleteNewsArticleFirebase(id: string): Promise<void> {

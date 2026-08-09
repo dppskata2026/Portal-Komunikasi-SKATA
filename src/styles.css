@@ -502,6 +502,83 @@ button, a { -webkit-tap-highlight-color: transparent; }
   color: #a0a5b0;
 }
 
+@keyframes marqueeScroll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-33.333333%);
+  }
+}
+
+.marquee-container:hover .marquee-track {
+  animation-play-state: paused !important;
+}
+
+@media (max-width: 640px) {
+  .hidden-mobile-badge {
+    display: none !important;
+  }
+}
+
+.editorial-featured-card-vibrant {
+  background: var(--card-bg, #ffffff);
+  border: 1px solid rgba(229, 27, 35, 0.15);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+[data-theme="dark"] .editorial-featured-card-vibrant {
+  background: #12141a;
+  border-color: rgba(229, 27, 35, 0.3);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4);
+}
+
+.editorial-featured-card-vibrant:hover {
+  transform: translateY(-5px);
+  border-color: rgba(229, 27, 35, 0.4);
+  box-shadow: 0 20px 40px -15px rgba(229, 27, 35, 0.2);
+}
+
+.editorial-featured-card-vibrant:hover .featured-img-zoom {
+  transform: scale(1.06);
+}
+
+.editorial-small-card-vibrant {
+  background: var(--card-bg, #ffffff);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 18px;
+  padding: 16px;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+[data-theme="dark"] .editorial-small-card-vibrant {
+  background: #12141a;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.editorial-small-card-vibrant:hover {
+  transform: translateY(-3px);
+  border-color: rgba(229, 27, 35, 0.3) !important;
+  box-shadow: 0 12px 28px -8px rgba(229, 27, 35, 0.15);
+}
+
+.editorial-small-card-vibrant:hover .small-card-img-zoom {
+  transform: scale(1.08);
+}
+
+.editorial-small-card-vibrant:hover .arrow-hover-indicator {
+  transform: translateX(4px);
+  color: #e51b23 !important;
+}
+
+.read-more-btn-pill:hover {
+  transform: scale(1.03);
+  box-shadow: 0 10px 25px rgba(229, 27, 35, 0.45) !important;
+}
+
 .sorotan-grid {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
