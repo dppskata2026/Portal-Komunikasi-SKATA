@@ -74,49 +74,49 @@ export const dppBoard = [
   {
     group: "Bidang",
     department: "Bidang Organisasi & Keanggotaan",
-    position: "Ketua",
+    position: "Ketua Bidang Organisasi & Keanggotaan",
     name: "Muji Rahmad",
     status: "Aktif"
   },
   {
     group: "Bidang",
     department: "Bidang Advokasi",
-    position: "Ketua",
+    position: "Ketua Bidang Advokasi",
     name: "Iskandar Zulkarnain",
     status: "Aktif"
   },
   {
     group: "Bidang",
     department: "Bidang Advokasi",
-    position: "Anggota",
+    position: "Anggota Bidang Advokasi",
     name: "Gremmy Jordan",
     status: "Aktif"
   },
   {
     group: "Bidang",
     department: "Bidang Usaha",
-    position: "Ketua",
+    position: "Ketua Bidang Usaha",
     name: "Andri",
     status: "Aktif"
   },
   {
     group: "Bidang",
     department: "Bidang Usaha",
-    position: "Anggota",
+    position: "Anggota Bidang Usaha",
     name: "Nuronia Zulva",
     status: "Aktif"
   },
   {
     group: "Bidang",
     department: "Bidang Komunikasi & Informasi",
-    position: "Ketua",
+    position: "Ketua Bidang Komunikasi & Informasi",
     name: "Wisnu Yogi Prabowo",
     status: "Aktif"
   },
   {
     group: "Bidang",
     department: "Bidang Komunikasi & Informasi",
-    position: "Anggota",
+    position: "Anggota Bidang Komunikasi & Informasi",
     name: "Alya Adianta",
     status: "Aktif"
   }

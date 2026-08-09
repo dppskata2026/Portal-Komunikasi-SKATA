@@ -160,13 +160,21 @@ export function PengurusDPP({ onBack }: PengurusDPPProps) {
 
     // Default formatting if not matched in uploaded database
     const slug = member.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const defaultNik = matchedNik || `100${Math.abs(slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) * 123 % 90000 + 10000)}`;
-    const defaultUnit = matchedUnit || (member.department ? `Unit ${member.department}` : 'DPP SKATA Kantor Pusat');
-    const defaultLocation = matchedLocation || 'Gedung Menara Multimedia, Kebon Sirih Jakarta';
-    const defaultDpw = matchedDpw || 'DPP (Kantor Pusat)';
-    // Phone number and email info cleared for board members as requested
-    const defaultEmail = '-';
-    const defaultPhone = '-';
+    let defaultNik = matchedNik || `100${Math.abs(slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) * 123 % 90000 + 10000)}`;
+    let defaultUnit = matchedUnit || (member.department ? `Unit ${member.department}` : 'DPP SKATA Kantor Pusat');
+    let defaultLocation = matchedLocation || 'Gedung Menara Multimedia, Kebon Sirih Jakarta';
+    let defaultDpw = matchedDpw || 'DPP (Kantor Pusat)';
+    let defaultEmail = matchedEmail || '-';
+    let defaultPhone = matchedPhone || '-';
+
+    if (member.name && member.name.toLowerCase().includes('alya adianta')) {
+      defaultNik = '98551624';
+      defaultUnit = 'Sales Segment Telkom Subsidiaries & Others';
+      defaultLocation = 'Kantor Pusat';
+      defaultDpw = 'DPP (Kantor Pusat)';
+      defaultPhone = '081283466000';
+      defaultEmail = 'alyaadianta1@gmail.com';
+    }
 
     setSelectedProfile({
       name: member.name,

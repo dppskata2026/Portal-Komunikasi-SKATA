@@ -224,22 +224,22 @@ export function TentangPage({ onBack, navigateTo }: { onBack: () => void; naviga
             <div className="org-grid-two">
               <div className="org-card plain">
                 <h4>Bidang Organisasi & Keanggotaan</h4>
-                <div><strong>Ketua:</strong> Muji Rahmad</div>
+                <div><strong>Ketua Bidang Organisasi & Keanggotaan:</strong> Muji Rahmad</div>
               </div>
               <div className="org-card plain">
                 <h4>Bidang Advokasi</h4>
-                <div><strong>Ketua:</strong> Iskandar Zulkarnain</div>
-                <div><strong>Anggota:</strong> Gremmy Jordan</div>
+                <div><strong>Ketua Bidang Advokasi:</strong> Iskandar Zulkarnain</div>
+                <div><strong>Anggota Bidang Advokasi:</strong> Gremmy Jordan</div>
               </div>
               <div className="org-card plain">
                 <h4>Bidang Usaha</h4>
-                <div><strong>Ketua:</strong> Andri</div>
-                <div><strong>Anggota:</strong> Nuronia Zulva</div>
+                <div><strong>Ketua Bidang Usaha:</strong> Andri</div>
+                <div><strong>Anggota Bidang Usaha:</strong> Nuronia Zulva</div>
               </div>
               <div className="org-card plain">
                 <h4>Bidang Komunikasi & Informasi</h4>
-                <div><strong>Ketua:</strong> Wisnu Yogi Prabowo</div>
-                <div><strong>Anggota:</strong> Alya Adianta</div>
+                <div><strong>Ketua Bidang Komunikasi & Informasi:</strong> Wisnu Yogi Prabowo</div>
+                <div><strong>Anggota Bidang Komunikasi & Informasi:</strong> Alya Adianta</div>
               </div>
             </div>
           </div>
@@ -1166,10 +1166,10 @@ export function BeritaPage({ onBack }: { onBack: () => void }) {
   // Form states for writing / editing news
   const [isWriting, setIsWriting] = useState(false);
   const [editingArticle, setEditingArticle] = useState<any | null>(null);
+  const [deletingArticle, setDeletingArticle] = useState<any | null>(null);
   const [newTitle, setNewTitle] = useState('');
   const [newCategory, setNewCategory] = useState('Berita Utama');
   const [newBody, setNewBody] = useState('');
-  const [newPhotoUrl, setNewPhotoUrl] = useState('');
   const [newPhotoPreview, setNewPhotoPreview] = useState('/assets/skata-hero-visual.png');
   const [publishSuccess, setPublishSuccess] = useState(false);
 
@@ -1211,14 +1211,17 @@ export function BeritaPage({ onBack }: { onBack: () => void }) {
     }
   }, [articles]);
 
-  const handleDeleteNews = async (id: string, e?: React.MouseEvent) => {
+  const handleOpenDeleteConfirm = (article: any, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    if (!window.confirm('Apakah Anda yakin ingin menghapus berita ini?')) return;
-    
+    if (!isSuperAdmin) return;
+    setDeletingArticle(article);
+  };
+
+  const confirmDeleteNews = async (id: string) => {
     try {
       await deleteNewsArticleFirebase(id);
-    } catch {
-      // Fallback local update
+    } catch (err) {
+      console.warn('Firebase delete failed, removing locally:', err);
     }
 
     const updated = articles.filter((a) => a.id !== id);
@@ -1227,6 +1230,7 @@ export function BeritaPage({ onBack }: { onBack: () => void }) {
     if (readingArticle && readingArticle.id === id) {
       setReadingArticle(null);
     }
+    setDeletingArticle(null);
   };
 
   const handleStartWrite = () => {
@@ -1235,7 +1239,6 @@ export function BeritaPage({ onBack }: { onBack: () => void }) {
     setNewTitle('');
     setNewCategory('Berita Utama');
     setNewBody('');
-    setNewPhotoUrl('');
     setNewPhotoPreview('/assets/skata-hero-visual.png');
     setIsWriting(true);
   };
@@ -1247,7 +1250,6 @@ export function BeritaPage({ onBack }: { onBack: () => void }) {
     setNewTitle(article.title || '');
     setNewCategory(article.category || 'Berita Utama');
     setNewBody(article.body || '');
-    setNewPhotoUrl(article.image && !article.image.startsWith('data:') ? article.image : '');
     setNewPhotoPreview(article.image || '/assets/skata-hero-visual.png');
     setIsWriting(true);
   };
@@ -1333,7 +1335,6 @@ export function BeritaPage({ onBack }: { onBack: () => void }) {
       setNewTitle('');
       setNewBody('');
       setNewCategory('Berita Utama');
-      setNewPhotoUrl('');
       setNewPhotoPreview('/assets/skata-hero-visual.png');
 
       try {
@@ -1371,7 +1372,6 @@ export function BeritaPage({ onBack }: { onBack: () => void }) {
       setNewTitle('');
       setNewBody('');
       setNewCategory('Berita Utama');
-      setNewPhotoUrl('');
       setNewPhotoPreview('/assets/skata-hero-visual.png');
 
       try {
@@ -1873,7 +1873,7 @@ export function BeritaPage({ onBack }: { onBack: () => void }) {
                         </button>
 
                         <button
-                          onClick={(e) => handleDeleteNews(article.id, e)}
+                          onClick={(e) => handleOpenDeleteConfirm(article, e)}
                           title="Hapus Berita Ini"
                           style={{
                             background: '#fef2f2',
@@ -2034,7 +2034,7 @@ export function BeritaPage({ onBack }: { onBack: () => void }) {
                       />
                     </div>
                     <div style={{ flex: 1, minWidth: '220px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                         <input
                           type="file"
                           accept="image/*"
@@ -2048,34 +2048,42 @@ export function BeritaPage({ onBack }: { onBack: () => void }) {
                             cursor: 'pointer',
                             background: '#ffffff',
                             border: '1px solid #cbd5e1',
-                            padding: '8px 14px',
+                            padding: '8px 16px',
                             borderRadius: '8px',
                             fontSize: '12.5px',
                             fontWeight: 700,
                             color: '#0f172a',
                             display: 'inline-flex',
                             alignItems: 'center',
-                            gap: '6px'
+                            gap: '6px',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
                           }}
                         >
                           <ImageIcon size={15} /> Unggah File Foto
                         </label>
+
+                        {newPhotoPreview !== '/assets/skata-hero-visual.png' && (
+                          <button
+                            type="button"
+                            onClick={() => setNewPhotoPreview('/assets/skata-hero-visual.png')}
+                            style={{
+                              background: '#f1f5f9',
+                              border: '1px solid #cbd5e1',
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              fontSize: '12px',
+                              fontWeight: 600,
+                              color: '#64748b',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Gunakan Gambar Bawaan
+                          </button>
+                        )}
                       </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <span style={{ color: '#64748b', fontSize: '12px' }}>atau masukkan Link URL Gambar:</span>
-                        <input
-                          type="url"
-                          placeholder="https://domain.com/foto-berita.jpg"
-                          value={newPhotoUrl}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            setNewPhotoUrl(val);
-                            if (val.trim()) setNewPhotoPreview(val.trim());
-                            else setNewPhotoPreview('/assets/skata-hero-visual.png');
-                          }}
-                          style={{ fontSize: '13px', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', width: '100%' }}
-                        />
-                      </div>
+                      <span style={{ color: '#64748b', fontSize: '12px' }}>
+                        Format yang didukung: JPG, PNG, WEBP. Jika tidak diunggah, gambar visual standar SKATA akan digunakan secara otomatis.
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -2287,7 +2295,7 @@ export function BeritaPage({ onBack }: { onBack: () => void }) {
                     </button>
 
                     <button
-                      onClick={() => handleDeleteNews(readingArticle.id)}
+                      onClick={() => handleOpenDeleteConfirm(readingArticle)}
                       style={{
                         background: '#fef2f2',
                         color: '#dc2626',
@@ -2321,6 +2329,106 @@ export function BeritaPage({ onBack }: { onBack: () => void }) {
                   }}
                 >
                   Tutup
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* DELETE CONFIRMATION MODAL */}
+        {deletingArticle && (
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(15, 23, 42, 0.75)',
+              backdropFilter: 'blur(6px)',
+              zIndex: 1100,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px'
+            }}
+          >
+            <div
+              style={{
+                background: '#ffffff',
+                borderRadius: '24px',
+                maxWidth: '480px',
+                width: '100%',
+                padding: '28px',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)',
+                border: '1px solid #fee2e2'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '18px' }}>
+                <div
+                  style={{
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '16px',
+                    background: '#fef2f2',
+                    color: '#dc2626',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    border: '1px solid #fecaca'
+                  }}
+                >
+                  <Trash2 size={24} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 850, color: '#0f172a' }}>
+                    Konfirmasi Hapus Berita
+                  </h3>
+                  <p style={{ margin: '2px 0 0', fontSize: '13px', color: '#64748b' }}>
+                    Aksi Super Admin — Portal SKATA
+                  </p>
+                </div>
+              </div>
+
+              <p style={{ fontSize: '14.5px', color: '#334155', lineHeight: 1.6, margin: '0 0 24px', background: '#f8fafc', padding: '14px 16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                Apakah Anda yakin ingin menghapus berita <strong style={{ color: '#0f172a' }}>"{deletingArticle.title}"</strong>? Berita yang sudah dirilis ini akan dihapus secara permanen.
+              </p>
+
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                <button
+                  type="button"
+                  onClick={() => setDeletingArticle(null)}
+                  style={{
+                    padding: '10px 20px',
+                    borderRadius: '30px',
+                    border: '1px solid #cbd5e1',
+                    background: '#ffffff',
+                    color: '#475569',
+                    fontWeight: 700,
+                    fontSize: '13.5px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  Kembali
+                </button>
+                <button
+                  type="button"
+                  onClick={() => confirmDeleteNews(deletingArticle.id)}
+                  style={{
+                    padding: '10px 22px',
+                    borderRadius: '30px',
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #e51b23 0%, #dc2626 100%)',
+                    color: '#ffffff',
+                    fontWeight: 800,
+                    fontSize: '13.5px',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 14px rgba(229, 27, 35, 0.35)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <Trash2 size={16} /> Ya, Hapus Berita
                 </button>
               </div>
             </div>

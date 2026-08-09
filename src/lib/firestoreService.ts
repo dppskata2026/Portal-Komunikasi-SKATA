@@ -90,33 +90,47 @@ export function safeSetLocalStorage(key: string, value: any): void {
 const DEFAULT_INITIAL_NEWS: Omit<NewsArticle, 'id'>[] = [
   {
     category: 'Berita Utama',
-    title: 'Peluncuran Portal SKATA Digital 2026 versi Terintegrasi & Modern',
-    excerpt: 'Dewan Pengurus Pusat Serikat Karyawan PT Grahasentra Santosa (SKATA GSD) secara resmi meluncurkan pembaruan sistem portal terintegrasi untuk mendukung keterbukaan informasi dan pelayanan anggota.',
-    body: `Dewan Pengurus Pusat Serikat Karyawan PT Grahasentra Santosa (SKATA GSD) secara resmi meluncurkan pembaruan sistem portal terintegrasi untuk mendukung keterbukaan informasi dan pelayanan anggota.
+    title: 'Perkuat Sinergi, Pengurus Baru SKATA Audiensi dengan Manajemen Telkom Property',
+    excerpt: 'Dewan Pengurus Pusat (DPP) SKATA Periode 2026–2028 melangsungkan pertemuan audiensi dan silaturahmi perdana bersama jajaran Manajemen PT Graha Sarana Duta (Telkom Property).',
+    body: `Dewan Pengurus Pusat (DPP) SKATA Periode 2026–2028 melangsungkan pertemuan audiensi dan silaturahmi perdana bersama jajaran Manajemen PT Graha Sarana Duta (Telkom Property) di Kantor Pusat Jakarta.
 
-Melalui portal ini, seluruh anggota dan pengurus dapat mengakses informasi terkini mengenai AD/ART, Perjanjian Kerja Bersama (PKB V), direktori keanggotaan digital, konsultasi ketenagakerjaan berbasis AI (Sahabat SKATA), hingga penyampaian aspirasi secara terpusat.
-
-Ketua Umum DPP SKATA GSD menyampaikan bahwa transformasi digital ini bertujuan untuk mempererat silaturahmi antaranggota lintas DPW di seluruh Indonesia sekaligus mewujudkan tata kelola organisasi yang transparan, akuntabel, dan efisien.`,
-    date: '09 Agustus 2026',
+Audiensi ini bertujuan untuk memperkuat sinergi hubungan industrial yang harmonis, dinamis, dan berkeadilan, serta menyampaikan pokok-pokok program kerja strategis kepengurusan baru dalam rangka peningkatan kesejahteraan dan profesionalisme karyawan.`,
+    date: '6 Agustus 2026',
     image: '/assets/skata-hero-visual.png',
-    createdAt: new Date(Date.now() - 3600000 * 24 * 3).toISOString()
+    createdAt: '2026-08-06T09:00:00.000Z'
   },
   {
-    category: 'Agenda',
-    title: 'Rapat Anggota Tahunan & Silaturahmi Nasional SKATA GSD 2026',
-    excerpt: 'Undangan Rapat Anggota Tahunan dan Konsolidasi Pengurus DPP & DPW SKATA seluruh Indonesia.',
-    body: `DPP SKATA GSD mengundang seluruh perwakilan DPW dan anggota aktif untuk menghadiri Rapat Anggota Tahunan (RAT) & Silaturahmi Nasional 2026.
+    category: 'Berita Utama',
+    title: 'Regenerasi dan Kolaborasi Lintas Generasi, SKATA Bentuk Kepengurusan Baru Periode 2026–2028',
+    excerpt: 'Jakarta, 31 Juli 2026 – Semangat regenerasi dan kolaborasi menjadi warna baru dalam perjalanan Serikat Karyawan Graha Sarana Duta (SKATA).',
+    body: `Jakarta, 31 Juli 2026 – Semangat regenerasi dan kolaborasi menjadi warna baru dalam perjalanan Serikat Karyawan Graha Sarana Duta (SKATA) menyongsong kepengurusan baru Periode 2026–2028.
 
-Agenda utama RAT kali ini meliputi:
-1. Laporan Pertanggungjawaban Pengurus DPP SKATA GSD Tahun 2025/2026.
-2. Evaluasi pelaksanaan Perjanjian Kerja Bersama (PKB V).
-3. Pembahasan program kerja strategis Kesejahteraan & Pengembangan Anggota Tahun 2026/2027.
-4. Konsolidasi organisasi dan penguatan solidaritas antarwilayah.
-
-Jadwal pelaksanaan: Sabtu, 15 Agustus 2026 pukul 09.00 WIB. Tautan pendaftaran dan konfirmasi kehadiran dapat diakses melalui sekretariat DPW masing-masing.`,
-    date: '15 Agustus 2026',
+Melalui sinergi antar-generasi, DPP SKATA berkomitmen menghadirkan kepemimpinan yang adaptif, inovatif, dan responsif terhadap tantangan era digital serta dinamika industri ketenagakerjaan.`,
+    date: '31 Juli 2026',
     image: '/assets/skata-hero-visual.png',
-    createdAt: new Date(Date.now() - 3600000 * 24 * 2).toISOString()
+    createdAt: '2026-07-31T09:00:00.000Z'
+  },
+  {
+    category: 'Berita Utama',
+    title: 'MUNAS VI SKATA BERLANGSUNG SUKSES, AMIRUDIN AHMAD TERPILIH SEBAGAI KETUA UMUM SKATA PERIODE 2026–2028',
+    excerpt: 'Musyawarah Nasional (MUNAS) VI SKATA 2026 menetapkan Amirudin Ahmad secara resmi sebagai Ketua Umum DPP SKATA Periode 2026–2028.',
+    body: `Musyawarah Nasional (MUNAS) VI SKATA Tahun 2026 yang berlangsung khidmat dan sukses secara resmi menetapkan Sdr. Amirudin Ahmad sebagai Ketua Umum Dewan Pengurus Pusat (DPP) SKATA Periode 2026–2028.
+
+MUNAS VI juga berhasil menetapkan penyempurnaan Anggaran Dasar dan Anggaran Rumah Tangga (AD/ART) serta menyusun susunan kepengurusan DPP dan Dewan Pembina SKATA untuk memperkokoh organisasi serikat pekerja.`,
+    date: '23 Juli 2026',
+    image: '/assets/skata-hero-visual.png',
+    createdAt: '2026-07-23T09:00:00.000Z'
+  },
+  {
+    category: 'Pengumuman',
+    title: 'Sosialisasi Perjanjian Kerja Bersama (PKB) V Periode 2025–2027',
+    excerpt: 'DPP SKATA bersama Manajemen menyelenggarakan kegiatan sosialisasi pasal-pasal kunci Perjanjian Kerja Bersama (PKB V) Periode 2025–2027.',
+    body: `Dewan Pengurus Pusat SKATA bersama Manajemen Perusahaan menyelenggarakan agenda Sosialisasi Perjanjian Kerja Bersama (PKB) V Periode 2025–2027 bagi seluruh anggota dan pengurus wilayah.
+
+Sosialisasi ini membahas secara mendalam hak dan kewajiban pekerja, ketentuan cuti, jaminan kesejahteraan, serta penafsiran pasal-pasal baru dalam PKB V guna mewujudkan kepastian hukum dan iklim kerja yang kondusif.`,
+    date: '21 Juli 2026',
+    image: '/assets/skata-hero-visual.png',
+    createdAt: '2026-07-21T09:00:00.000Z'
   },
   {
     category: 'Pengumuman',
@@ -124,25 +138,10 @@ Jadwal pelaksanaan: Sabtu, 15 Agustus 2026 pukul 09.00 WIB. Tautan pendaftaran d
     excerpt: 'Himbauan bagi seluruh anggota aktif SKATA untuk memperbarui biodata dan verifikasi e-KTA melalui Portal Digital.',
     body: `Dalam rangka penataan tertib administrasi keanggotaan nasional, DPP SKATA GSD menghimbau seluruh anggota aktif untuk melakukan pemutakhiran data pribadi dan nomor e-KTA.
 
-Proses verifikasi data dilakukan secara mandiri melalui menu 'Daftar Anggota' pada Portal SKATA Digital. Data yang diperbarui akan menjadi acuan resmi distribusi fasilitas dan hak keanggotaan serikat.
-
-Batas waktu pemutakhiran data adalah tanggal 31 Agustus 2026. Bagi anggota yang mengalami kendala teknis dapat menghubungi tim sekretariat melalui menu Kontak.`,
-    date: '05 Agustus 2026',
+Proses verifikasi data dilakukan secara mandiri melalui menu 'Daftar Anggota' pada Portal SKATA Digital. Data yang diperbarui akan menjadi acuan resmi distribusi fasilitas dan hak keanggotaan serikat.`,
+    date: '15 Juli 2026',
     image: '/assets/skata-hero-visual.png',
-    createdAt: new Date(Date.now() - 3600000 * 24 * 5).toISOString()
-  },
-  {
-    category: 'Pendidikan',
-    title: 'Workshop Pelatihan Hubungan Industrial & Pemahaman PKB V SKATA',
-    excerpt: 'Program edukasi dan bimbingan teknis pemahaman Perjanjian Kerja Bersama (PKB V) bagi pengurus wilayah dan anggota.',
-    body: `Bidang Pendidikan dan Advokasi DPP SKATA GSD menyelenggarakan Workshop Pelatihan Hubungan Industrial & Pemahaman PKB V bagi perwakilan pengurus dan anggota.
-
-Materi pelatihan meliputi pemahaman hak dan kewajiban pekerja, mekanisme penyelesaian perselisihan hubungan industrial, penafsiran pasal-pasal kunci dalam PKB V, serta teknik advokasi keanggotaan.
-
-Pelatihan diselenggarakan secara interaktif dengan narasumber pakar hukum ketenagakerjaan dan jajaran Pengurus Pusat SKATA.`,
-    date: '01 Agustus 2026',
-    image: '/assets/skata-hero-visual.png',
-    createdAt: new Date(Date.now() - 3600000 * 24 * 8).toISOString()
+    createdAt: '2026-07-15T09:00:00.000Z'
   }
 ];
 
@@ -161,12 +160,33 @@ async function seedInitialNewsArticles() {
 }
 
 function parseArticleTimestamp(article: NewsArticle): number {
-  if (article.createdAt) {
-    const t = new Date(article.createdAt).getTime();
+  if (article.date) {
+    const indonesianMonths: Record<string, string> = {
+      'januari': 'January',
+      'februari': 'February',
+      'maret': 'March',
+      'april': 'April',
+      'mei': 'May',
+      'juni': 'June',
+      'juli': 'July',
+      'agustus': 'August',
+      'september': 'September',
+      'oktober': 'October',
+      'november': 'November',
+      'desember': 'December'
+    };
+    let dateStr = article.date.toLowerCase().trim();
+    for (const [indo, eng] of Object.entries(indonesianMonths)) {
+      if (dateStr.includes(indo)) {
+        dateStr = dateStr.replace(indo, eng);
+        break;
+      }
+    }
+    const t = new Date(dateStr).getTime();
     if (!isNaN(t)) return t;
   }
-  if (article.date) {
-    const t = new Date(article.date).getTime();
+  if (article.createdAt) {
+    const t = new Date(article.createdAt).getTime();
     if (!isNaN(t)) return t;
   }
   return 0;
