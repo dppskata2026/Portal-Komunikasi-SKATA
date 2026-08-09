@@ -252,15 +252,15 @@ function Navbar({
             <span className="theme-knob">{darkMode ? <Moon size={14} /> : <Sun size={14} />}</span>
           </button>
 
-          {isLoggedIn ? (
+          {isLoggedIn && user ? (
             <button
               className="login-button"
               onClick={() => navigate('/login')}
-              title={`Akses: ${ROLE_LABELS[user.role].label} - ${user.name}`}
+              title={`Akses: ${ROLE_LABELS[user.role]?.label || 'Super Admin'} - ${user.name}`}
               style={{
-                background: ROLE_LABELS[user.role].bg,
-                color: ROLE_LABELS[user.role].color,
-                border: `1.5px solid ${ROLE_LABELS[user.role].color}60`,
+                background: ROLE_LABELS[user.role]?.bg || '#f3e8ff',
+                color: ROLE_LABELS[user.role]?.color || '#6b21a8',
+                border: `1.5px solid ${ROLE_LABELS[user.role]?.color || '#6b21a8'}60`,
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
@@ -274,11 +274,7 @@ function Navbar({
               <span>
                 {user.role === 'superadmin'
                   ? 'Super Admin'
-                  : user.role === 'dpp'
-                  ? 'DPP'
-                  : user.dpwRegion
-                  ? user.dpwRegion.split(' ')[0] + ' ' + (user.dpwRegion.split(' ')[1] || '')
-                  : 'Anggota'}
+                  : user.name.split(' ')[0]}
               </span>
             </button>
           ) : (
@@ -927,6 +923,7 @@ function LoginModal({ open, onClose }: { open: boolean; onClose: () => void }) {
 
 export default function App() {
   const [loginOpen, setLoginOpen] = useState(false);
+  const { user, isLoggedIn } = useAuth();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [currentPath, setCurrentPath] = useState(() => window.location.pathname);
 
@@ -971,9 +968,19 @@ export default function App() {
     return () => document.removeEventListener('click', handleGlobalClick);
   }, []);
 
+  // Private Portal Guard: If not logged in, force Login Page for all routes
+  if (!isLoggedIn) {
+    return (
+      <main style={{ minHeight: '100vh', background: '#f8fafc', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <LoginPage onSuccess={() => navigate('/')} />
+      </main>
+    );
+  }
+
   // Routing Switch
   const renderContent = () => {
     const path = currentPath.toLowerCase();
+
 
     // Beranda
     if (path === '/' || path === '/beranda' || path === '') {

@@ -2,14 +2,14 @@ import { useState, useEffect } from 'react';
 import { getActiveSession, UserSession } from './authService';
 
 export function useAuth(): {
-  user: UserSession;
+  user: UserSession | null;
   isLoggedIn: boolean;
   isSuperAdmin: boolean;
   isDpp: boolean;
   isDpw: boolean;
   isGuest: boolean;
 } {
-  const [user, setUser] = useState<UserSession>(() => getActiveSession());
+  const [user, setUser] = useState<UserSession | null>(() => getActiveSession());
 
   useEffect(() => {
     const handleAuthChange = () => {
@@ -25,12 +25,15 @@ export function useAuth(): {
     };
   }, []);
 
+  const isLoggedIn = user !== null;
+
   return {
     user,
-    isLoggedIn: user.role !== 'guest',
-    isSuperAdmin: user.role === 'superadmin',
-    isDpp: user.role === 'dpp',
-    isDpw: user.role === 'dpw',
-    isGuest: user.role === 'guest'
+    isLoggedIn,
+    isSuperAdmin: user?.role === 'superadmin',
+    isDpp: user?.role === 'dpp' || user?.role === 'superadmin',
+    isDpw: user?.role === 'dpw' || user?.role === 'dpp' || user?.role === 'superadmin',
+    isGuest: !isLoggedIn
   };
 }
+
