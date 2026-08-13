@@ -24,12 +24,14 @@ import {
   UserRoundCheck,
   UsersRound,
   X,
+  KeyRound,
 } from 'lucide-react';
 
 import { Breadcrumbs } from './components/Breadcrumbs';
 import { SkataWordmark } from './components/SkataWordmark';
 import { useAuth } from './lib/useAuth';
 import { ROLE_LABELS, PRESET_ACCOUNTS, setActiveSession, logoutUser, UserSession } from './lib/authService';
+import { UserProfileModal } from './components/UserProfileModal';
 import { ProfilSKATA } from './components/ProfilSKATA';
 import { VisiMisi } from './components/VisiMisi';
 import { StrukturOrganisasi } from './components/StrukturOrganisasi';
@@ -156,11 +158,18 @@ function Navbar({
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [profileInitialTab, setProfileInitialTab] = useState<'profile' | 'password'>('profile');
   const { user, isLoggedIn } = useAuth();
 
   useEffect(() => {
     document.documentElement.dataset.theme = darkMode ? 'dark' : 'light';
   }, [darkMode]);
+
+  const openProfile = (tab: 'profile' | 'password') => {
+    setProfileInitialTab(tab);
+    setProfileModalOpen(true);
+  };
 
   return (
     <header className="navbar-shell">
@@ -257,8 +266,8 @@ function Navbar({
           {isLoggedIn && user ? (
             <button
               className="login-button"
-              onClick={() => navigate('/login')}
-              title={`Akses: ${ROLE_LABELS[user.role]?.label || 'Super Admin'} - ${user.name}`}
+              onClick={() => openProfile('profile')}
+              title={`Detail Profil: ${user.name}`}
               style={{
                 background: ROLE_LABELS[user.role]?.bg || '#f3e8ff',
                 color: ROLE_LABELS[user.role]?.color || '#6b21a8',
@@ -269,15 +278,12 @@ function Navbar({
                 padding: '0 14px',
                 fontWeight: 800,
                 fontSize: '13px',
-                borderRadius: '10px'
+                borderRadius: '10px',
+                cursor: 'pointer'
               }}
             >
-              <ShieldCheck size={16} />
-              <span>
-                {user.role === 'superadmin'
-                  ? 'Super Admin'
-                  : user.name.split(' ')[0]}
-              </span>
+              <User size={15} />
+              <span>Profil</span>
             </button>
           ) : (
             <button className="login-button" onClick={() => navigate('/login')}>
@@ -296,6 +302,15 @@ function Navbar({
           </button>
         </div>
       </nav>
+
+      {user && (
+        <UserProfileModal
+          user={user}
+          isOpen={profileModalOpen}
+          onClose={() => setProfileModalOpen(false)}
+          initialTab={profileInitialTab}
+        />
+      )}
     </header>
   );
 }

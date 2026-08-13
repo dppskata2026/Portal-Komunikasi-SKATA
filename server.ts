@@ -157,7 +157,7 @@ DATABASE REGULASI & INFORMASI RESMI SKATA:
         return res.status(400).json({ error: 'Format pesan tidak valid.' });
       }
 
-      const candidateModels = ['gemini-2.5-flash', 'gemini-3.6-flash', 'gemini-2.5-pro'];
+      const candidateModels = ['gemini-3.6-flash', 'gemini-3.1-pro-preview'];
       let replyText = '';
 
       for (const modelName of candidateModels) {

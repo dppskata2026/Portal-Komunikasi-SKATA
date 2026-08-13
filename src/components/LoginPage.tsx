@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Lock, Mail, ShieldCheck, CheckCircle, LogOut, KeyRound, ArrowRight, Eye, EyeOff, Megaphone, Sparkles, Building2, Shield, Users, Award, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../lib/useAuth';
-import { PRESET_ACCOUNTS, setActiveSession, logoutUser, UserSession } from '../lib/authService';
+import { PRESET_ACCOUNTS, setActiveSession, logoutUser, UserSession, getCustomPassword } from '../lib/authService';
+import { SKATA_LOGO_BASE64 } from '../assets/logoBase64';
+import { SkataWordmark } from './SkataWordmark';
 
 interface LoginPageProps {
   onBack?: () => void;
@@ -15,6 +17,7 @@ export function LoginPage({ onBack, onSuccess }: LoginPageProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [logoSrc, setLogoSrc] = useState(SKATA_LOGO_BASE64);
 
   const handleManualLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +27,11 @@ export function LoginPage({ onBack, onSuccess }: LoginPageProps) {
     setTimeout(() => {
       setIsSubmitting(false);
       const cleanedEmail = email.trim().toLowerCase();
-      const match = PRESET_ACCOUNTS.find(a => a.email.toLowerCase() === cleanedEmail && a.pass === password);
+      const customPass = getCustomPassword();
+      const match = PRESET_ACCOUNTS.find(a => 
+        a.email.toLowerCase() === cleanedEmail && 
+        (customPass ? password === customPass || password === a.pass : password === a.pass)
+      );
       
       if (match) {
         const session: UserSession = {
@@ -33,8 +40,12 @@ export function LoginPage({ onBack, onSuccess }: LoginPageProps) {
           email: match.email,
           nik: match.nik,
           role: match.role,
-          dpwRegion: match.dpwRegion,
-          position: match.position,
+          dpwRegion: match.dpwRegion || 'DPP SKATA Pusat - Jakarta',
+          position: match.position || 'Super Administrator & Pengurus Pusat',
+          unitName: match.unitName || 'Sekretariat DPP SKATA GSD',
+          office: match.office || 'Gedung Graha Sarana Duta Pusat (Telkom Property)',
+          phone: match.phone || '0811-9922-3847',
+          membershipStatus: match.membershipStatus || 'Anggota Aktif Terverifikasi (Pengurus DPP)',
           loginAt: new Date().toISOString()
         };
         setActiveSession(session);
@@ -45,7 +56,7 @@ export function LoginPage({ onBack, onSuccess }: LoginPageProps) {
         if (emailMatch) {
           setErrorMsg('Kata sandi yang Anda masukkan salah. Silakan periksa kembali kata sandi Anda.');
         } else {
-          setErrorMsg('Email tidak terdaftar atau kata sandi tidak cocok. Gunakan dppskata@gmail.com.');
+          setErrorMsg('Email tidak terdaftar atau kata sandi tidak cocok. Silakan periksa kembali email dan kata sandi Anda.');
         }
       }
     }, 400);
@@ -101,7 +112,23 @@ export function LoginPage({ onBack, onSuccess }: LoginPageProps) {
           >
             <ArrowLeft size={16} /> Kembali ke Beranda
           </button>
-        ) : <div />}
+        ) : (
+          <a
+            href="/"
+            onClick={(e) => { e.preventDefault(); if (onBack) onBack(); }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}
+          >
+            <img
+              src={logoSrc}
+              alt="SKATA"
+              style={{ height: '40px', width: 'auto', maxWidth: '36px', objectFit: 'contain', filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.2))' }}
+              onError={() => {
+                if (logoSrc === SKATA_LOGO_BASE64) setLogoSrc('/skata-logo-official.png');
+              }}
+            />
+            <SkataWordmark size="sm" className="login-skata-wordmark" />
+          </a>
+        )}
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', fontWeight: 800, color: '#fecdd3', background: 'rgba(229, 27, 35, 0.15)', padding: '6px 14px', borderRadius: '20px', border: '1px solid rgba(229, 27, 35, 0.3)' }}>
           <Sparkles size={14} style={{ color: '#fbbf24' }} /> PORTAL RESMI SKATA 2026
@@ -140,16 +167,17 @@ export function LoginPage({ onBack, onSuccess }: LoginPageProps) {
             <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.15) 1px, transparent 1px)', backgroundSize: '24px 24px', opacity: 0.3, pointerEvents: 'none' }} />
 
             <div style={{ position: 'relative', zIndex: 2 }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', background: 'rgba(255, 255, 255, 0.15)', padding: '8px 18px', borderRadius: '40px', backdropFilter: 'blur(10px)', border: '1px solid rgba(255, 255, 255, 0.25)', marginBottom: '24px' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', background: 'rgba(255, 255, 255, 0.18)', padding: '10px 20px', borderRadius: '50px', backdropFilter: 'blur(12px)', border: '1px solid rgba(255, 255, 255, 0.3)', boxShadow: '0 4px 16px rgba(0,0,0,0.2)', marginBottom: '24px' }}>
                 <img
-                  src="/skata-logo-official.png"
-                  alt="Logo SKATA"
-                  style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #ffffff', boxShadow: '0 2px 8px rgba(0,0,0,0.2)' }}
-                  onError={(e) => { (e.target as HTMLImageElement).src = '/assets/skata-hero-visual.png'; }}
+                  src={logoSrc}
+                  alt="Logo resmi SKATA — Serikat Karyawan GSD"
+                  style={{ height: '46px', width: 'auto', maxWidth: '42px', objectFit: 'contain', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.2))' }}
+                  onError={() => {
+                    if (logoSrc === SKATA_LOGO_BASE64) setLogoSrc('/skata-logo-official.png');
+                    else if (logoSrc === '/skata-logo-official.png') setLogoSrc('/assets/skata-logo-official.png');
+                  }}
                 />
-                <span style={{ fontSize: '13.5px', fontWeight: 850, letterSpacing: '0.04em', textTransform: 'uppercase', color: '#ffffff' }}>
-                  SERIKAT KARYAWAN GSD
-                </span>
+                <SkataWordmark size="md" className="login-skata-wordmark" />
               </div>
 
               <h1 style={{ fontSize: '30px', fontWeight: 900, lineHeight: 1.2, margin: '0 0 12px', letterSpacing: '-0.02em', textShadow: '0 2px 10px rgba(0,0,0,0.2)' }}>
